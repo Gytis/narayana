@@ -208,6 +208,7 @@
     </profiles>
     <modules>
         <module>unit</module>
+        <module>WSTX</module>
         <module>WSTX11-interop</module>
         <module>WSTFSC07-interop</module>
         <module>xtstest</module>
