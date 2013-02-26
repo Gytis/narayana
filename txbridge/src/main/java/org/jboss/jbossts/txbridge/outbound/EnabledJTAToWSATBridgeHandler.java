@@ -15,9 +15,6 @@ public class EnabledJTAToWSATBridgeHandler<C extends MessageContext> extends Abs
 
     @Override
     protected boolean isEnabled(C context) {
-        // TODO remove
-        System.out.println("EnabledJTAToWSATBridgeHandler.isEnabled");
-
         return !DISABLED_VALUE.equals(context.get(REQUEST_CONTEXT_KEY));
     }
 
