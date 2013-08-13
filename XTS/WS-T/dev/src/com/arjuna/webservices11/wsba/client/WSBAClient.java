@@ -1,12 +1,13 @@
 package com.arjuna.webservices11.wsba.client;
 
 import com.arjuna.webservices11.wsaddr.AddressingHelper;
+import org.oasis_open.docs.ws_tx.wsba._2006._06.BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType;
+import org.oasis_open.docs.ws_tx.wsba._2006._06.BusinessAgreementWithParticipantCompletionSynchronousCoordinatorService;
 import org.jboss.ws.api.addressing.MAPBuilder;
 import org.jboss.ws.api.addressing.MAP;
 import org.jboss.ws.api.addressing.MAPBuilderFactory;
 import org.oasis_open.docs.ws_tx.wsba._2006._06.*;
 
-import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
@@ -26,6 +27,8 @@ public class WSBAClient
      *  thread local which maintains a per thread participant completion coordinator service instance
      */
     private static ThreadLocal<BusinessAgreementWithParticipantCompletionCoordinatorService> participantCompletionCoordinatorService = new ThreadLocal<BusinessAgreementWithParticipantCompletionCoordinatorService>();
+
+    private static ThreadLocal<BusinessAgreementWithParticipantCompletionSynchronousCoordinatorService> participantCompletionSynchronousCoordinatorService = new ThreadLocal<BusinessAgreementWithParticipantCompletionSynchronousCoordinatorService>();
 
     /**
      *  thread local which maintains a per thread participant completion participant service instance
@@ -58,6 +61,15 @@ public class WSBAClient
             participantCompletionCoordinatorService.set(new BusinessAgreementWithParticipantCompletionCoordinatorService());
         }
         return participantCompletionCoordinatorService.get();
+    }
+
+    private static synchronized BusinessAgreementWithParticipantCompletionSynchronousCoordinatorService getParticipantCompletionSynchronousCoordinatorService()
+    {
+        if (participantCompletionSynchronousCoordinatorService.get() == null) {
+            participantCompletionSynchronousCoordinatorService.set(new BusinessAgreementWithParticipantCompletionSynchronousCoordinatorService());
+        }
+
+        return participantCompletionSynchronousCoordinatorService.get();
     }
 
     /**
@@ -114,6 +126,21 @@ public class WSBAClient
         return port;
     }
 
+    public static BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType getParticipantCompletionSynchronousCoordinatorPort(
+            W3CEndpointReference endpointReference, String action, MAP map)
+    {
+        BusinessAgreementWithParticipantCompletionSynchronousCoordinatorService service =
+                getParticipantCompletionSynchronousCoordinatorService();
+        BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType port =
+                service.getPort(endpointReference,
+                        BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType.class,
+                        new AddressingFeature(true, true));
+        BindingProvider bindingProvider = (BindingProvider) port;
+        configureEndpointPort(bindingProvider, action, map);
+
+        return port;
+    }
+
     public static BusinessAgreementWithParticipantCompletionParticipantPortType getParticipantCompletionParticipantPort(W3CEndpointReference endpointReference,
                                                          String action,
                                                          MAP map)
@@ -162,6 +189,21 @@ public class WSBAClient
         BusinessAgreementWithParticipantCompletionCoordinatorService service = getParticipantCompletionCoordinatorService();
         BusinessAgreementWithParticipantCompletionCoordinatorPortType port = service.getPort(BusinessAgreementWithParticipantCompletionCoordinatorPortType.class, new AddressingFeature(true, true));
         BindingProvider bindingProvider = (BindingProvider)port;
+
+        configurePort(bindingProvider, action, map);
+
+        return port;
+    }
+
+    public static BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType
+    getParticipantCompletionSynchronousCoordinatorPort(String action, MAP map)
+    {
+        BusinessAgreementWithParticipantCompletionSynchronousCoordinatorService service =
+                getParticipantCompletionSynchronousCoordinatorService();
+        BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType port =
+                service.getPort(BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType.class,
+                        new AddressingFeature(true, true));
+        BindingProvider bindingProvider = (BindingProvider) port;
 
         configurePort(bindingProvider, action, map);
 

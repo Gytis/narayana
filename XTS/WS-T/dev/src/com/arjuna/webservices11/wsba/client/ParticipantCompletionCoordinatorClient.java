@@ -28,6 +28,7 @@ import com.arjuna.webservices11.ServiceRegistry;
 import com.arjuna.webservices11.wsaddr.AddressingHelper;
 import com.arjuna.webservices11.wsaddr.NativeEndpointReference;
 import com.arjuna.webservices11.wsaddr.EndpointHelper;
+import org.oasis_open.docs.ws_tx.wsba._2006._06.BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType;
 import org.jboss.ws.api.addressing.MAPEndpoint;
 import org.oasis_open.docs.ws_tx.wsba._2006._06.BusinessAgreementWithParticipantCompletionCoordinatorPortType;
 import org.oasis_open.docs.ws_tx.wsba._2006._06.ExceptionType;
@@ -138,6 +139,17 @@ public class ParticipantCompletionCoordinatorClient
         AddressingHelper.installFromFaultTo(map, participant, identifier);
         BusinessAgreementWithParticipantCompletionCoordinatorPortType port;
         port = getPort(endpoint, map, completedAction);
+        NotificationType completed = new NotificationType();
+
+        port.completedOperation(completed);
+    }
+
+    public void sendSynchronousCompleted(W3CEndpointReference endpoint, final MAP map, final InstanceIdentifier identifier)
+    {
+        MAPEndpoint participant = getParticipant(endpoint, map);
+        AddressingHelper.installFromFaultTo(map, participant, identifier);
+        BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType port;
+        port = getSynchronousPort(endpoint, map, completedAction);
         NotificationType completed = new NotificationType();
 
         port.completedOperation(completed);
@@ -364,6 +376,17 @@ public class ParticipantCompletionCoordinatorClient
             return WSBAClient.getParticipantCompletionCoordinatorPort(participant, action, map);
         } else {
             return WSBAClient.getParticipantCompletionCoordinatorPort(action, map);
+        }
+    }
+
+    private BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType getSynchronousPort(
+            final W3CEndpointReference participant, final MAP map, final String action)
+    {
+        AddressingHelper.installNoneReplyTo(map);
+        if (participant != null) {
+            return WSBAClient.getParticipantCompletionSynchronousCoordinatorPort(participant, action, map);
+        } else {
+            return WSBAClient.getParticipantCompletionSynchronousCoordinatorPort(action, map);
         }
     }
 }

@@ -32,6 +32,11 @@ public interface BusinessActivityConstants
      */
     public String WSBA_NAMESPACE = "http://docs.oasis-open.org/ws-tx/wsba/2006/06";
     /**
+     * Namespace for WS-BA service not specified in the standard.
+     */
+//    public String WSBA_NOT_STANDARD_NAMESPACE = "http://jboss.org/ws-tx/wsba";
+    public String WSBA_NOT_STANDARD_NAMESPACE = "http://docs.oasis-open.org/ws-tx/wsba/2006/06";
+    /**
      * The namespace prefix.
      */
     public String WSBA_PREFIX = "wsba";
@@ -52,6 +57,23 @@ public interface BusinessActivityConstants
      * The WSBA Participant Completion Cordinator Port QName.
      */
     public QName PARTICIPANT_COMPLETION_COORDINATOR_PORT_QNAME = new QName(WSBA_NAMESPACE, PARTICIPANT_COMPLETION_COORDINATOR_PORT_NAME, WSBA_PREFIX);
+
+    /**
+     * The WSBA Participant Completion Synchronous Cordinator Service Name.
+     */
+    public String PARTICIPANT_COMPLETION_SYNCHRONOUS_COORDINATOR_SERVICE_NAME = "BusinessAgreementWithParticipantCompletionSynchronousCoordinatorService";
+    /**
+     * The WSBA Participant Completion Synchronous Cordinator Service QName.
+     */
+    public QName PARTICIPANT_COMPLETION_SYNCHRONOUS_COORDINATOR_SERVICE_QNAME = new QName(WSBA_NOT_STANDARD_NAMESPACE, PARTICIPANT_COMPLETION_SYNCHRONOUS_COORDINATOR_SERVICE_NAME, WSBA_PREFIX);
+    /**
+     * The WSBA Participant Completion Synchronous Cordinator Port Name.
+     */
+    public String PARTICIPANT_COMPLETION_SYNCHRONOUS_COORDINATOR_PORT_NAME = "BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType";
+    /**
+     * The WSBA Participant Completion Synchronous Cordinator Port QName.
+     */
+    public QName PARTICIPANT_COMPLETION_SYNCHRONOUS_COORDINATOR_PORT_QNAME = new QName(WSBA_NOT_STANDARD_NAMESPACE, PARTICIPANT_COMPLETION_SYNCHRONOUS_COORDINATOR_PORT_NAME, WSBA_PREFIX);
 
     /**
      * The WSBA Participant Completion Participant Service Name.

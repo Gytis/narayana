@@ -123,7 +123,7 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
      * @param participant The participant.
      */
     public ParticipantCompletionParticipantEngine(final String id, final W3CEndpointReference coordinator,
-        final BusinessAgreementWithParticipantCompletionParticipant participant)
+                                                  final BusinessAgreementWithParticipantCompletionParticipant participant)
     {
         this(id, coordinator, participant, State.STATE_ACTIVE, false) ;
     }
@@ -137,7 +137,7 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
      * @param recovered true if the engine has been recovered from th elog otherwise false
      */
     public ParticipantCompletionParticipantEngine(final String id, final W3CEndpointReference coordinator,
-        final BusinessAgreementWithParticipantCompletionParticipant participant, final State state, boolean recovered)
+                                                  final BusinessAgreementWithParticipantCompletionParticipant participant, final State state, boolean recovered)
     {
         this.id = id ;
         this.instanceIdentifier = new InstanceIdentifier(id) ;
@@ -177,7 +177,7 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
     {
         final State current ;
         synchronized(this)
-        {                                      
+        {
             current = state ;
             if (current == State.STATE_ACTIVE)
             {
@@ -191,7 +191,7 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
         }
         else if (current == State.STATE_COMPLETED)
         {
-            sendCompleted() ;
+            sendCompleted(true) ;
         }
         else if ((current == State.STATE_FAILING_ACTIVE) || (current == State.STATE_FAILING_CANCELING))
         {
@@ -360,7 +360,7 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
         {
             current = state ;
             if ((current == State.STATE_FAILING_ACTIVE) || (current == State.STATE_FAILING_CANCELING) ||
-                (current == State.STATE_FAILING_COMPENSATING))
+                    (current == State.STATE_FAILING_COMPENSATING))
             {
                 deleteRequired = persisted;
             }
@@ -371,11 +371,11 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
             if (!XTSBARecoveryManager.getRecoveryManager().deleteParticipantRecoveryRecord(id)) {
                 // hmm, could not delete entry -- nothing more we can do than log a message
                 WSTLogger.i18NLogger.warn_wst11_messaging_engines_ParticipantCompletionParticipantEngine_failed_1(id);
-            } 
+            }
         }
         // now the log record has been deleted we can safely end this participant
         if ((current == State.STATE_FAILING_ACTIVE) || (current == State.STATE_FAILING_CANCELING) ||
-            (current == State.STATE_FAILING_COMPENSATING))
+                (current == State.STATE_FAILING_COMPENSATING))
         {
             ended();
         }
@@ -407,7 +407,7 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
             current = state ;
             if (current == State.STATE_NOT_COMPLETING)
             {
-        	ended() ;
+                ended() ;
             }
         }
     }
@@ -421,12 +421,12 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
      */
     public void getStatus(final NotificationType getStatus, final MAP map, final ArjunaContext arjunaContext)
     {
-	final State current ;
-	synchronized(this)
-	{
-	    current = state ;
-	}
-	sendStatus(current) ;
+        final State current ;
+        synchronized(this)
+        {
+            current = state ;
+        }
+        sendStatus(current) ;
     }
 
     /**
@@ -469,7 +469,7 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
 
         if (current == State.STATE_COMPLETED)
         {
-            sendCompleted(true);
+            sendCompleted(true, true);
         }
     }
 
@@ -531,52 +531,29 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
      */
     public State completed()
     {
-        State current ;
-        boolean failRequired  = false;
-        boolean deleteRequired  = false;
-        boolean confirm = (participant instanceof ConfirmCompletedParticipant);
-        synchronized(this)
-        {
-            current = state ;
-
-            // we have to do this synchronized so that we don't try writing the participant details twice
-
-            if (current == State.STATE_ACTIVE) {
-                // ok we need to write the participant details to disk because it has just completed
-                BAParticipantRecoveryRecord recoveryRecord = new BAParticipantRecoveryRecord(id, participant, true, coordinator);
-
-                if (XTSBARecoveryManager.getRecoveryManager().writeParticipantRecoveryRecord(recoveryRecord)) {
-                    changeState(State.STATE_COMPLETED);
-                    persisted = true;
-                    // if necessary notify the client now. n.b. this has to be done synchronized because
-                    // if we release the lock then a resent COMPLETE may result in a COMPLETED being
-                    // sent back and we cannot allow that until after the confirm
-                    if (confirm) {
-                        ((ConfirmCompletedParticipant) participant).confirmCompleted(true);
-                    }
-                } else {
-                    // hmm, could not write entry log warning
-                    WSTLogger.i18NLogger.warn_wst11_messaging_engines_ParticipantCompletionParticipantEngine_completed_1(id);
-                    // we need to fail this transaction
-                    failRequired = true;
-                }
-            }
-        }
-
-        // check to see if we need to send a fail or delete the log record before going ahead to complete
-
-        if (failRequired) {
-            current = fail(BusinessActivityConstants.WSBA_ELEMENT_FAIL_QNAME);
-            // we can safely do this now
-            if (confirm) {
-                ((ConfirmCompletedParticipant) participant).confirmCompleted(false);
-            }
-        } else if ((current == State.STATE_ACTIVE) || (current == State.STATE_COMPLETED)) {
-            sendCompleted() ;
-        }
-
-        return current ;
+        return completed(true);
     }
+
+    /**
+     * Handle the completed event.
+     *
+     * Active -> Completed
+     * Canceling -> Canceling (invalid state)
+     * Completed -> Completed
+     * Closing -> Closing (invalid state)
+     * Compensating -> Compensating (invalid state)
+     * Failing-Active -> Failing-Active (invalid state)
+     * Failing-Canceling -> Failing-Canceling (invalid state)
+     * Failing-Compensating -> Failing-Compensating (invalid state)
+     * NotCompleting -> NotCompleting (invalid state)
+     * Exiting -> Exiting (invalid state)
+     * Ended -> Ended (invalid state)
+     */
+    public State synchronousCompleted()
+    {
+        return completed(false);
+    }
+
 
     /**
      * Handle the exit event.
@@ -640,7 +617,7 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
             }
             else if (current == State.STATE_CANCELING)
             {
-        	changeState(State.STATE_FAILING_CANCELING) ;
+                changeState(State.STATE_FAILING_CANCELING) ;
             }
             else if (current == State.STATE_COMPENSATING)
             {
@@ -702,6 +679,55 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
         return current ;
     }
 
+    private State completed(boolean isAsynchronous)
+    {
+        State current ;
+        boolean failRequired  = false;
+        boolean deleteRequired  = false;
+        boolean confirm = (participant instanceof ConfirmCompletedParticipant);
+        synchronized(this)
+        {
+            current = state ;
+
+            // we have to do this synchronized so that we don't try writing the participant details twice
+
+            if (current == State.STATE_ACTIVE) {
+                // ok we need to write the participant details to disk because it has just completed
+                BAParticipantRecoveryRecord recoveryRecord = new BAParticipantRecoveryRecord(id, participant, true, coordinator);
+
+                if (XTSBARecoveryManager.getRecoveryManager().writeParticipantRecoveryRecord(recoveryRecord)) {
+                    changeState(State.STATE_COMPLETED);
+                    persisted = true;
+                    // if necessary notify the client now. n.b. this has to be done synchronized because
+                    // if we release the lock then a resent COMPLETE may result in a COMPLETED being
+                    // sent back and we cannot allow that until after the confirm
+                    if (confirm) {
+                        ((ConfirmCompletedParticipant) participant).confirmCompleted(true);
+                    }
+                } else {
+                    // hmm, could not write entry log warning
+                    WSTLogger.i18NLogger.warn_wst11_messaging_engines_ParticipantCompletionParticipantEngine_completed_1(id);
+                    // we need to fail this transaction
+                    failRequired = true;
+                }
+            }
+        }
+
+        // check to see if we need to send a fail or delete the log record before going ahead to complete
+
+        if (failRequired) {
+            current = fail(BusinessActivityConstants.WSBA_ELEMENT_FAIL_QNAME);
+            // we can safely do this now
+            if (confirm) {
+                ((ConfirmCompletedParticipant) participant).confirmCompleted(false);
+            }
+        } else if ((current == State.STATE_ACTIVE) || (current == State.STATE_COMPLETED)) {
+            sendCompleted(isAsynchronous) ;
+        }
+
+        return current ;
+    }
+
     /**
      * Handle the comms timeout event.
      *
@@ -723,7 +749,7 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
 
         if (current == State.STATE_COMPLETED)
         {
-            sendCompleted(true) ;
+            sendCompleted(true, true) ;
         }
     }
 
@@ -751,9 +777,9 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
      * Send the completed message
      */
 
-    private void sendCompleted()
+    private void sendCompleted(boolean isAsynchronous)
     {
-        sendCompleted(false);
+        sendCompleted(isAsynchronous, false);
     }
 
     /**
@@ -761,7 +787,7 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
      *
      * @param timedOut true if this is in response to a comms timeout
      */
-    private void sendCompleted(boolean timedOut)
+    private void sendCompleted(boolean isAsynchronous, boolean timedOut)
     {
         final MAP map = createContext() ;
         try
@@ -769,8 +795,10 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
             // if we are trying to reestablish the participant state then send getStatus otherwise send completed 
             if (timedOut && checkStatus) {
                 ParticipantCompletionCoordinatorClient.getClient().sendGetStatus(coordinator, map, instanceIdentifier); ;
-            } else {
+            } else if (isAsynchronous) {
                 ParticipantCompletionCoordinatorClient.getClient().sendCompleted(coordinator, map, instanceIdentifier) ;
+            } else {
+                ParticipantCompletionCoordinatorClient.getClient().sendSynchronousCompleted(coordinator, map, instanceIdentifier);
             }
         }
         catch (final Throwable th)
@@ -1178,7 +1206,7 @@ public class ParticipantCompletionParticipantEngine implements ParticipantComple
      */
     private void ended()
     {
-	changeState(State.STATE_ENDED) ;
+        changeState(State.STATE_ENDED) ;
         ParticipantCompletionParticipantProcessor.getProcessor().deactivateParticipant(this) ;
     }
 
