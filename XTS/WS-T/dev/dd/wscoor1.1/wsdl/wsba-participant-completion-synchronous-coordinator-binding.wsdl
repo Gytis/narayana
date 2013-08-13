@@ -1,0 +1,185 @@
+<?xml version='1.0' encoding='UTF-8'?><wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns="http://docs.oasis-open.org/ws-tx/wsba/2006/06" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1="http://schemas.xmlsoap.org/soap/http" name="BusinessAgreementWithParticipantCompletionSynchronousCoordinatorService" targetNamespace="http://docs.oasis-open.org/ws-tx/wsba/2006/06">
+    <wsdl:types>
+        <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://docs.oasis-open.org/ws-tx/wsba/2006/06" elementFormDefault="qualified" targetNamespace="http://docs.oasis-open.org/ws-tx/wsba/2006/06" version="1.0">
+            <xs:element name="BAAtomicOutcomeAssertion">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
+                    </xs:sequence>
+                    <xs:anyAttribute namespace="##other" processContents="skip"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="BAMixedOutcomeAssertion">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
+                    </xs:sequence>
+                    <xs:anyAttribute namespace="##other" processContents="skip"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="Cancel" type="tns:NotificationType"/>
+            <xs:element name="Canceled" type="tns:NotificationType"/>
+            <xs:element name="CannotComplete" type="tns:NotificationType"/>
+            <xs:element name="Close" type="tns:NotificationType"/>
+            <xs:element name="Closed" type="tns:NotificationType"/>
+            <xs:element name="Compensate" type="tns:NotificationType"/>
+            <xs:element name="Compensated" type="tns:NotificationType"/>
+            <xs:element name="Complete" type="tns:NotificationType"/>
+            <xs:element name="Completed" type="tns:NotificationType"/>
+            <xs:element name="Exit" type="tns:NotificationType"/>
+            <xs:element name="Exited" type="tns:NotificationType"/>
+            <xs:element name="Fail" type="tns:ExceptionType"/>
+            <xs:element name="Failed" type="tns:NotificationType"/>
+            <xs:element name="GetStatus" type="tns:NotificationType"/>
+            <xs:element name="NotCompleted" type="tns:NotificationType"/>
+            <xs:element name="Status" type="tns:StatusType"/>
+            <xs:complexType name="NotificationType">
+                <xs:sequence>
+                    <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##other" processContents="skip"/>
+            </xs:complexType>
+            <xs:complexType name="ExceptionType">
+                <xs:sequence>
+                    <xs:element name="ExceptionIdentifier" type="xs:QName"/>
+                    <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##other" processContents="skip"/>
+            </xs:complexType>
+            <xs:complexType name="StatusType">
+                <xs:sequence>
+                    <xs:element name="State" type="xs:QName"/>
+                    <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##other" processContents="skip"/>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="CompletedOperationResponse">
+    </wsdl:message>
+    <wsdl:message name="CompletedOperation">
+        <wsdl:part element="tns:Completed" name="parameters">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:portType name="BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType">
+        <wsdl:operation name="CompletedOperation">
+            <wsdl:input message="tns:CompletedOperation" name="CompletedOperation">
+            </wsdl:input>
+            <wsdl:output message="tns:CompletedOperationResponse" name="CompletedOperationResponse">
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="BusinessAgreementWithParticipantCompletionSynchronousCoordinatorServiceSoapBinding" type="tns:BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsaw:UsingAddressing wsdl:required="true"/>
+        <wsp:PolicyReference URI="#BusinessAgreementWithParticipantCompletionSynchronousCoordinatorServiceSoapBinding_WSAM_Addressing_Policy"/>
+        <wsdl:operation name="CompletedOperation">
+            <soap:operation soapAction="http://docs.oasis-open.org/ws-tx/wsba/2006/06/Completed" style="document"/>
+            <wsdl:input name="CompletedOperation">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="CompletedOperationResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="BusinessAgreementWithParticipantCompletionSynchronousCoordinatorService">
+        <wsdl:port binding="tns:BusinessAgreementWithParticipantCompletionSynchronousCoordinatorServiceSoapBinding" name="BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType">
+            <soap:address location="http://localhost:8080/ws-t11-synchronous-coordinator/BusinessAgreementWithParticipantCompletionSynchronousCoordinatorService"/>
+        </wsdl:port>
+    </wsdl:service>
+    <wsp:Policy xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="BusinessAgreementWithParticipantCompletionSynchronousCoordinatorServiceSoapBinding_WSAM_Addressing_Policy"><wsam:Addressing xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata"><wsp:Policy/></wsam:Addressing></wsp:Policy>
+</wsdl:definitions>
+<!--
+<?xml version='1.0' encoding='UTF-8'?><wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns="http://jboss.org/ws-tx/wsba" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns2="http://schemas.xmlsoap.org/soap/http" xmlns:ns1="http://docs.oasis-open.org/ws-tx/wsba/2006/06" name="BusinessAgreementWithParticipantCompletionSynchronousCoordinatorService" targetNamespace="http://jboss.org/ws-tx/wsba">
+    <wsdl:types>
+        <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://docs.oasis-open.org/ws-tx/wsba/2006/06" elementFormDefault="qualified" targetNamespace="http://docs.oasis-open.org/ws-tx/wsba/2006/06" version="1.0">
+            <xs:element name="BAAtomicOutcomeAssertion">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
+                    </xs:sequence>
+                    <xs:anyAttribute namespace="##other" processContents="skip"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="BAMixedOutcomeAssertion">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
+                    </xs:sequence>
+                    <xs:anyAttribute namespace="##other" processContents="skip"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="Cancel" type="tns:NotificationType"/>
+            <xs:element name="Canceled" type="tns:NotificationType"/>
+            <xs:element name="CannotComplete" type="tns:NotificationType"/>
+            <xs:element name="Close" type="tns:NotificationType"/>
+            <xs:element name="Closed" type="tns:NotificationType"/>
+            <xs:element name="Compensate" type="tns:NotificationType"/>
+            <xs:element name="Compensated" type="tns:NotificationType"/>
+            <xs:element name="Complete" type="tns:NotificationType"/>
+            <xs:element name="Completed" type="tns:NotificationType"/>
+            <xs:element name="Exit" type="tns:NotificationType"/>
+            <xs:element name="Exited" type="tns:NotificationType"/>
+            <xs:element name="Fail" type="tns:ExceptionType"/>
+            <xs:element name="Failed" type="tns:NotificationType"/>
+            <xs:element name="GetStatus" type="tns:NotificationType"/>
+            <xs:element name="NotCompleted" type="tns:NotificationType"/>
+            <xs:element name="Status" type="tns:StatusType"/>
+            <xs:complexType name="NotificationType">
+                <xs:sequence>
+                    <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##other" processContents="skip"/>
+            </xs:complexType>
+            <xs:complexType name="ExceptionType">
+                <xs:sequence>
+                    <xs:element name="ExceptionIdentifier" type="xs:QName"/>
+                    <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##other" processContents="skip"/>
+            </xs:complexType>
+            <xs:complexType name="StatusType">
+                <xs:sequence>
+                    <xs:element name="State" type="xs:QName"/>
+                    <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##other" processContents="skip"/>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="CompletedOperation">
+        <wsdl:part element="ns1:Completed" name="parameters">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="CompletedOperationResponse">
+    </wsdl:message>
+    <wsdl:portType name="BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType">
+        <wsdl:operation name="CompletedOperation">
+            <wsdl:input message="tns:CompletedOperation" name="CompletedOperation">
+            </wsdl:input>
+            <wsdl:output message="tns:CompletedOperationResponse" name="CompletedOperationResponse">
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="BusinessAgreementWithParticipantCompletionSynchronousCoordinatorServiceSoapBinding" type="tns:BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsaw:UsingAddressing wsdl:required="true"/>
+        <wsp:PolicyReference URI="#BusinessAgreementWithParticipantCompletionSynchronousCoordinatorServiceSoapBinding_WSAM_Addressing_Policy"/>
+        <wsdl:operation name="CompletedOperation">
+            <soap:operation soapAction="http://docs.oasis-open.org/ws-tx/wsba/2006/06/Completed" style="document"/>
+            <wsdl:input name="CompletedOperation">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="CompletedOperationResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="BusinessAgreementWithParticipantCompletionSynchronousCoordinatorService">
+        <wsdl:port binding="tns:BusinessAgreementWithParticipantCompletionSynchronousCoordinatorServiceSoapBinding" name="BusinessAgreementWithParticipantCompletionSynchronousCoordinatorPortType">
+            <soap:address location="http://localhost:8080/ws-t11-synchronous-coordinator/BusinessAgreementWithParticipantCompletionSynchronousCoordinatorService"/>
+        </wsdl:port>
+    </wsdl:service>
+    <wsp:Policy xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="BusinessAgreementWithParticipantCompletionSynchronousCoordinatorServiceSoapBinding_WSAM_Addressing_Policy"><wsam:Addressing xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata"><wsp:Policy/></wsam:Addressing></wsp:Policy>
+</wsdl:definitions>-->
