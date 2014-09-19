@@ -173,24 +173,18 @@ public class GenericRecoveryCoordinator extends org.omg.CosTransactions.Recovery
 
 	    currentStatus = Status.StatusRolledBack;
 	}
-        else if ( currentStatus == Status.StatusCommitted )
-        {
-            /*
-             * If the status returned is StatusCommitted, the only reason a
-             * replay_completion request can come in is if the resource on 
-             * the other end has not received the second phase and hence the 
-             * transaction is in the process of committing and has not
-	     * committed.
-             */
 
-            currentStatus = Status.StatusCommitting;
-        }
-
-	if (!transactionActive)
+    /**
+     * If the original process is dead, then it is reasonable for us to try and
+     * recover.
+     *
+     * Alternatively, if a transaction is in Status.StatusCommitted, there is a
+     * possibility that there exist a resource which is in an indoubt state
+     * because of a temporary failure during the initial commit. In such case,
+     * second phase has to be completed by the recovery manager.
+     */
+	if (!transactionActive || currentStatus == Status.StatusCommitted)
 	{
-	    // original process is dead, so reasonable for us to try to 
-	    // recover
-
 	    /*
 	     * The RecoveredTransactionReplayer is a threaded object
 	     * so we can get the status and return it while the
