@@ -225,6 +225,18 @@ public class GenericRecoveryCoordinator extends org.omg.CosTransactions.Recovery
 	    if (replayer.getRecoveryStatus() != com.arjuna.ats.internal.jts.recovery.transactions.RecoveryStatus.ACTIVATE_FAILED)
 	    {
 		replayer.replayPhase2();
+		if ( replayer.getStatus() == Status.StatusCommitted )
+                {
+	         /*
+        	  * If the status returned is StatusCommitted, the only reason a
+             	  * replay_completion request can come in is if the resource on 
+             	  * the other end has not received the second phase and hence the 
+             	  * transaction is in the process of committing and has not
+	     	  * committed.
+             	  */
+
+                  currentStatus = Status.StatusCommitting;
+                }
 	    }
 	    else
 	    {
