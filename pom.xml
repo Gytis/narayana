@@ -480,6 +480,7 @@
     <module>osgi</module>
     <module>narayana-full</module>
     <module>code-coverage</module>
+    <module>compensations-extensions</module>
   </modules>
   <profiles>
     <profile>
