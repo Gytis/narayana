@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-public class TestConfirmationHandler implements ConfirmationHandler {
+public class InsertConfirmationHandler implements ConfirmationHandler {
 
     public static AtomicInteger INVOCATIONS_COUNTER = new AtomicInteger();
 

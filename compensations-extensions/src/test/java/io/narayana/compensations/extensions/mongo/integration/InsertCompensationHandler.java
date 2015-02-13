@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-public class TestCompensationHandler implements CompensationHandler {
+public class InsertCompensationHandler implements CompensationHandler {
 
     public static AtomicInteger INVOCATIONS_COUNTER = new AtomicInteger();
 
