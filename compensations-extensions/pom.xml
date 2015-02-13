@@ -16,13 +16,14 @@
     <!-- TODO move to the root pom -->
     <properties>
         <version.org.mongodb>3.0.0-beta1</version.org.mongodb>
+        <version.org.jboss.shrinkwrap.resolver>2.1.1</version.org.jboss.shrinkwrap.resolver>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.jboss.narayana.compensations</groupId>
             <artifactId>compensations</artifactId>
-            <version>5.0.5.Final-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>
@@ -54,21 +55,10 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.shrinkwrap.resolver</groupId>
-            <artifactId>shrinkwrap-resolver-api</artifactId>
-            <version>2.0.0-beta-1</version>
+            <artifactId>shrinkwrap-resolver-depchain</artifactId>
+            <version>${version.org.jboss.shrinkwrap.resolver}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.shrinkwrap.resolver</groupId>
-            <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
-            <version>2.0.0-beta-1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.shrinkwrap.resolver</groupId>
-            <artifactId>shrinkwrap-resolver-api-maven</artifactId>
-            <version>2.0.0-beta-1</version>
-            <scope>test</scope>
+            <type>pom</type>
         </dependency>
     </dependencies>
 
@@ -95,9 +85,6 @@
                             <redirectTestOutputToFile>true</redirectTestOutputToFile>
                             <skip>false</skip>
                             <systemPropertyVariables combine.children="append">
-                                <!--
-                                    Used in arquillian.xml
-                                -->
                                 <server.jvm.args>
                                     ${jvm.args.other} ${jvm.args.memory} ${jvm.args.debug}
                                 </server.jvm.args>
@@ -107,6 +94,9 @@
                             <includes>
                                 <include>**/*Test.java</include>
                             </includes>
+                            <systemProperties>
+                                <version.org.mongodb>${version.org.mongodb}</version.org.mongodb>
+                            </systemProperties>
                         </configuration>
                     </plugin>
                 </plugins>

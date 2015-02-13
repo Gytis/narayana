@@ -1,1 +1,1 @@
-CompensatableOperationCDIExtension
+org.jboss.narayana.compensations.impl.CompensationsCDIExtension

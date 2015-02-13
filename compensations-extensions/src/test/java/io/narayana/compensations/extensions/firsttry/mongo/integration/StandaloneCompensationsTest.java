@@ -29,7 +29,7 @@ public class StandaloneCompensationsTest {
         }
     }
 
-    @Test
+//    @Test
     public void testInsertOne() {
         db.createCollection("testcol");
         final MongoCollection<Document> collection = db.getCollection("testcol");
