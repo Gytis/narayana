@@ -3,6 +3,8 @@ package io.narayana.compensations.extensions.mongo.integration;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import io.narayana.compensations.extensions.mongo.CompensatableMongoClient;
+import org.bson.BsonDocument;
+import org.bson.BsonString;
 import org.bson.Document;
 import org.jboss.narayana.compensations.api.TxCompensate;
 import org.jboss.narayana.compensations.api.TxConfirm;
@@ -27,8 +29,14 @@ public class DatabaseManager {
 
     @TxCompensate(InsertCompensationHandler.class)
     @TxConfirm(InsertConfirmationHandler.class)
-    public void insert(final String key, final String value) {
+    public void insertDocument(final String key, final String value) {
         database.getCollection(COLLECTION_NAME).insertOne(new Document(key, value));
+    }
+
+    @TxCompensate(InsertCompensationHandler.class)
+    @TxConfirm(InsertConfirmationHandler.class)
+    public void insertBsonDocument(final String key, final String value) {
+        database.getCollection(COLLECTION_NAME, BsonDocument.class).insertOne(new BsonDocument(key, new BsonString(value)));
     }
 
     public Iterator<Document> getAll() {

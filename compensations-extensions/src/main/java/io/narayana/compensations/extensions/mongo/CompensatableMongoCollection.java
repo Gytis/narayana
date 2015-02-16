@@ -23,6 +23,7 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.WriteModel;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+import org.bson.BsonDocument;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 
@@ -43,6 +44,18 @@ public final class CompensatableMongoCollection<T> implements MongoCollection<T>
 
     @Override
     public void insertOne(T document) {
+        // TODO move to the better place
+        if (document instanceof Document) {
+            final TransactionData<Document> transactionData = new TransactionData<>("dummyTransactionId",
+                    TransactionData.OperationType.INSERT, null, (Document) document);
+
+            ((Document) document).put("txinfo", transactionData.toDocument());
+        } else if (document instanceof BsonDocument) {
+            final TransactionData<BsonDocument> transactionData = new TransactionData<>("dummyTransactionId",
+                    TransactionData.OperationType.INSERT, null, (BsonDocument) document);
+            ((BsonDocument) document).put("txinfo", transactionData.toBsonDocument());
+        }
+
         delegate.insertOne(document);
     }
 
