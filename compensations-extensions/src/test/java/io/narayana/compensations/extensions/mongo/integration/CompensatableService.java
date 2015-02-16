@@ -19,8 +19,8 @@ public class CompensatableService {
     @Compensatable
     public void execute() {
         INVOCATIONS_COUNTER.incrementAndGet();
-        databaseManager.insert("test", "1");
-        databaseManager.insert("test", "2");
+        databaseManager.insertDocument("test", "1");
+        databaseManager.insertBsonDocument("test", "2");
     }
 
 }
