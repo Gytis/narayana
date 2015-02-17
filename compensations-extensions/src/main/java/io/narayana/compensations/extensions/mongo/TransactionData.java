@@ -1,99 +1,135 @@
 package io.narayana.compensations.extensions.mongo;
 
-import org.bson.BsonDocument;
-import org.bson.BsonString;
-import org.bson.Document;
+import org.jboss.narayana.compensations.api.CompensationScoped;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
+ * TODO state might be better put in a separate class implementing specific interface
+ *
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-public class TransactionData<T> {
+@CompensationScoped
+public class TransactionData implements Serializable {
 
-    private final String transactionId;
+    private String transactionId;
 
-    private final OperationType operation;
+    private String originalState;
 
-    private final T originalDocument;
+    private String newState;
 
-    private final T newDocument;
+    private Date timestamp;
 
-    private final Date timestamp;
+    public TransactionData() {
 
-    public TransactionData(final String transactionId, final OperationType operation,
-            final T originalDocument, final T newDocument) {
+    }
+
+    public TransactionData(final String transactionId, final String originalState, final String newState) {
+        this.transactionId = transactionId;
+        this.originalState = originalState;
+        this.newState = newState;
+        this.timestamp = new Date();
+    }
+
+    public TransactionData(final String transactionId, final String originalState, final String newState,
+            final Date timestamp) {
 
         this.transactionId = transactionId;
-        this.operation = operation;
-        this.originalDocument = originalDocument;
-        this.newDocument = newDocument;
-        this.timestamp = new Date();
+        this.originalState = originalState;
+        this.newState = newState;
+        this.timestamp = timestamp;
     }
 
     public String getTransactionId() {
         return transactionId;
     }
 
-    public OperationType getOperation() {
-        return operation;
+    public void setTransactionId(final String transactionId) {
+        this.transactionId = transactionId;
     }
 
-    public T getOriginalDocument() {
-        return originalDocument;
+    public String getOriginalState() {
+        return originalState;
     }
 
-    public T getNewDocument() {
-        return newDocument;
+    public void setOriginalState(final String originalState) {
+        this.originalState = originalState;
+    }
+
+    public String getNewState() {
+        return newState;
+    }
+
+    public void setNewDocument(final String newState) {
+        this.newState = newState;
     }
 
     public Date getTimestamp() {
         return new Date(timestamp.getTime());
     }
 
+    public void setTimestamp(final Date timestamp) {
+        this.timestamp = new Date(timestamp.getTime());
+    }
+
+    @Override
     public String toString() {
-        return "<TransactionData: transactionId=" + transactionId + ", operation="+ operation + ", originalDocument="
-                + originalDocument + ", newDocument=" + newDocument + ", timestamp=" + timestamp.getTime() + ">";
-    }
-
-    public Document toDocument() {
-        final Document document = new Document();
-
-        document.put("transactionId", transactionId);
-        document.put("operation", operation.name());
-        document.put("timestamp", timestamp.toString());
-
-        if (originalDocument != null && originalDocument instanceof Document) {
-            document.put("originalDocument", originalDocument.toString());
+        final String timestampString;
+        if (timestamp != null) {
+            timestampString = String.valueOf(timestamp.getTime());
+        } else {
+            timestampString = null;
         }
 
-        if (newDocument != null && newDocument instanceof Document) {
-            document.put("newDocument", newDocument.toString());
-        }
-
-        return document;
+        return String.format("<%s: transactionId=%s, originalState=%s, newState=%s, timestamp=%s>",
+                getClass().getSimpleName(), transactionId, originalState, newState, timestampString);
     }
 
-    public BsonDocument toBsonDocument() {
-        final BsonDocument document = new BsonDocument();
-
-        document.put("transactionId", new BsonString(transactionId));
-        document.put("operation", new BsonString(operation.name()));
-        document.put("timestamp", new BsonString(timestamp.toString()));
-
-        if (originalDocument != null && originalDocument instanceof BsonDocument) {
-            document.put("originalDocument", new BsonString(originalDocument.toString()));
+    @Override
+    public boolean equals(final Object o) {
+        if (o == null || !(o instanceof TransactionData)) {
+            return false;
         }
 
-        if (newDocument != null && newDocument instanceof BsonDocument) {
-            document.put("newDocument", new BsonString(newDocument.toString()));
+        final TransactionData transactionData = (TransactionData) o;
 
+        boolean areEquals = transactionId.equals(transactionData.transactionId)
+                && timestamp.equals(transactionData.timestamp);
+
+        if (originalState == null) {
+            areEquals &= transactionData.originalState == null;
+        } else {
+            areEquals &= originalState.equals(transactionData.originalState);
         }
 
-        return document;
+        if (newState == null) {
+            areEquals &= transactionData.newState == null;
+        } else {
+            areEquals &= newState.equals(transactionData.newState);
+        }
+
+        return areEquals;
     }
 
-    public enum OperationType {
-        INSERT, UPDATE, DELETE
+    public static TransactionData valueOf(String s) {
+        s = s.substring(s.indexOf("=") + 1);
+        String transactionId = s.substring(0, s.indexOf(","));
+        transactionId = ("null".equals(transactionId) ? null : transactionId);
+
+        s = s.substring(s.indexOf("=") + 1);
+        String originalState = s.substring(0, s.indexOf(","));
+        originalState = ("null".equals(originalState) ? null : originalState);
+
+        s = s.substring(s.indexOf("=") + 1);
+        String newState = s.substring(0, s.indexOf(","));
+        newState = ("null".equals(newState) ? null : newState);
+
+        s = s.substring(s.indexOf("=") + 1);
+        String timestampString = s.substring(0, s.indexOf(">"));
+        long timestamp = ("null".equals(timestampString) ? 0 : Long.valueOf(timestampString));
+
+        return new TransactionData(transactionId, originalState, newState, new Date(timestamp));
     }
+
 }
