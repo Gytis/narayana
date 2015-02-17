@@ -2,13 +2,13 @@ package io.narayana.compensations.extensions.mongo.integration;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import io.narayana.compensations.extensions.mongo.CompensatableMongoClient;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
 import org.bson.Document;
 import org.jboss.narayana.compensations.api.TxCompensate;
 import org.jboss.narayana.compensations.api.TxConfirm;
 
+import javax.inject.Inject;
 import java.util.Iterator;
 
 /**
@@ -22,8 +22,8 @@ public class DatabaseManager {
 
     private final MongoDatabase database;
 
-    public DatabaseManager() {
-        final MongoClient client = new CompensatableMongoClient();
+    @Inject
+    public DatabaseManager(final MongoClient client) {
         database = client.getDatabase(DB_NAME);
     }
 

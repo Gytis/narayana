@@ -23,37 +23,50 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.WriteModel;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+import io.narayana.compensations.extensions.mongo.handlers.InsertConfirmationHandler;
 import org.bson.BsonDocument;
+import org.bson.BsonString;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.jboss.narayana.compensations.api.TxConfirm;
 
+import javax.inject.Inject;
 import java.util.List;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-public final class CompensatableMongoCollection<T> implements MongoCollection<T> {
+public class CompensatableMongoCollection<T> implements MongoCollection<T> {
 
-    private final MongoCollection<T> delegate;
+    private MongoCollection<T> delegate;
+
+    @Inject
+    private TransactionData transactionData;
+
+    public CompensatableMongoCollection() {
+
+    }
 
     public CompensatableMongoCollection(final MongoCollection<T> delegate) {
+        this.delegate = delegate;
+    }
+
+    public void setDelegate(final MongoCollection delegate) {
         this.delegate = delegate;
     }
 
     // Decorated methods
 
     @Override
+    @TxConfirm(value = InsertConfirmationHandler.class)
     public void insertOne(T document) {
         // TODO move to the better place
-        if (document instanceof Document) {
-            final TransactionData<Document> transactionData = new TransactionData<>("dummyTransactionId",
-                    TransactionData.OperationType.INSERT, null, (Document) document);
+        final TransactionData transactionData = new TransactionData("dummyTransactionId", null, document.toString());
 
-            ((Document) document).put("txinfo", transactionData.toDocument());
+        if (document instanceof Document) {
+            ((Document) document).put("txinfo", transactionData.toString());
         } else if (document instanceof BsonDocument) {
-            final TransactionData<BsonDocument> transactionData = new TransactionData<>("dummyTransactionId",
-                    TransactionData.OperationType.INSERT, null, (BsonDocument) document);
-            ((BsonDocument) document).put("txinfo", transactionData.toBsonDocument());
+            ((BsonDocument) document).put("txinfo", new BsonString(transactionData.toString()));
         }
 
         delegate.insertOne(document);
