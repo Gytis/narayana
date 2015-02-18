@@ -13,7 +13,7 @@ public class TransactionDataTest {
 
     @Test
     public void testToStringWithNulls() {
-        final TransactionData transactionData = new TransactionData();
+        final TransactionData transactionData = new TransactionData(null, null, null, null);
 
         Assert.assertEquals("<TransactionData: transactionId=null, originalState=null, newState=null, timestamp=null>",
                 transactionData.toString());

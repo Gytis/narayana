@@ -27,8 +27,9 @@ import io.narayana.compensations.extensions.mongo.handlers.InsertConfirmationHan
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.jboss.narayana.compensations.api.TxConfirm;
+import org.jboss.narayana.compensations.impl.BAControler;
+import org.jboss.narayana.compensations.impl.BAControllerFactory;
 
-import javax.inject.Inject;
 import java.util.List;
 
 /**
@@ -37,9 +38,6 @@ import java.util.List;
 public class CompensatableMongoCollection implements MongoCollection<Document> {
 
     private MongoCollection<Document> delegate;
-
-    @Inject
-    private TransactionData transactionData;
 
     public CompensatableMongoCollection() {
         // Should only be invoked by CDI
@@ -55,10 +53,20 @@ public class CompensatableMongoCollection implements MongoCollection<Document> {
     @TxConfirm(value = InsertConfirmationHandler.class)
     public void insertOne(Document document) {
         // TODO move to the better place
-        final TransactionData transactionData = new TransactionData("dummyTransactionId", null, document.toString());
+        final BAControler baControler = BAControllerFactory.getInstance();
 
-        document.put("txinfo", transactionData.toString());
-        delegate.insertOne((Document) document);
+        if (baControler.isBARunning()) {
+            try {
+                final Object currentTransaction = baControler.getCurrentTransaction();
+                final TransactionData transactionData = new TransactionData(currentTransaction.toString(), null,
+                        document.toString());
+                document.put("txinfo", transactionData.toDocument());
+            } catch (final Exception e) {
+                throw new RuntimeException("Failed to get currently running transaction", e);
+            }
+        }
+
+        delegate.insertOne(document);
     }
 
     @Override

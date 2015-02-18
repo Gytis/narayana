@@ -1,6 +1,6 @@
 package io.narayana.compensations.extensions.mongo;
 
-import org.jboss.narayana.compensations.api.CompensationScoped;
+import org.bson.Document;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -10,7 +10,6 @@ import java.util.Date;
  *
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-@CompensationScoped
 public class TransactionData implements Serializable {
 
     private String transactionId;
@@ -20,10 +19,6 @@ public class TransactionData implements Serializable {
     private String newState;
 
     private Date timestamp;
-
-    public TransactionData() {
-
-    }
 
     public TransactionData(final String transactionId, final String originalState, final String newState) {
         this.transactionId = transactionId;
@@ -45,32 +40,16 @@ public class TransactionData implements Serializable {
         return transactionId;
     }
 
-    public void setTransactionId(final String transactionId) {
-        this.transactionId = transactionId;
-    }
-
     public String getOriginalState() {
         return originalState;
-    }
-
-    public void setOriginalState(final String originalState) {
-        this.originalState = originalState;
     }
 
     public String getNewState() {
         return newState;
     }
 
-    public void setNewDocument(final String newState) {
-        this.newState = newState;
-    }
-
     public Date getTimestamp() {
         return new Date(timestamp.getTime());
-    }
-
-    public void setTimestamp(final Date timestamp) {
-        this.timestamp = new Date(timestamp.getTime());
     }
 
     @Override
@@ -84,6 +63,16 @@ public class TransactionData implements Serializable {
 
         return String.format("<%s: transactionId=%s, originalState=%s, newState=%s, timestamp=%s>",
                 getClass().getSimpleName(), transactionId, originalState, newState, timestampString);
+    }
+
+    public Document toDocument() {
+        final Document document = new Document();
+        document.put("transactionId", transactionId);
+        document.put("originalState", originalState);
+        document.put("newState", newState);
+        document.put("timestamp", timestamp);
+
+        return document;
     }
 
     @Override
