@@ -17,7 +17,6 @@ public class TransactionDataTest {
 
         Assert.assertEquals("<TransactionData: transactionId=null, originalState=null, newState=null, timestamp=null>",
                 transactionData.toString());
-        System.out.println(transactionData.toString());
     }
 
     @Test

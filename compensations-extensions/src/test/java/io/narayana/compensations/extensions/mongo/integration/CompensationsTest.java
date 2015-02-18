@@ -1,5 +1,6 @@
 package io.narayana.compensations.extensions.mongo.integration;
 
+import io.narayana.compensations.extensions.mongo.TransactionData;
 import org.bson.Document;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -43,6 +44,7 @@ public class CompensationsTest {
 
         final WebArchive archive = ShrinkWrap.create(WebArchive.class, "test.war")
                 .addPackage("io.narayana.compensations.extensions.mongo")
+                .addPackage("io.narayana.compensations.extensions.mongo.handlers")
                 .addPackage("io.narayana.compensations.extensions.mongo.integration")
                 .addAsManifestResource("services/javax.enterprise.inject.spi.Extension")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
@@ -100,5 +102,7 @@ public class CompensationsTest {
 
         Assert.assertTrue(remainingValues.isEmpty());
     }
+
+
 
 }

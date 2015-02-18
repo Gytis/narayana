@@ -24,8 +24,6 @@ import com.mongodb.client.model.WriteModel;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import io.narayana.compensations.extensions.mongo.handlers.InsertConfirmationHandler;
-import org.bson.BsonDocument;
-import org.bson.BsonString;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.jboss.narayana.compensations.api.TxConfirm;
@@ -36,22 +34,18 @@ import java.util.List;
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-public class CompensatableMongoCollection<T> implements MongoCollection<T> {
+public class CompensatableMongoCollection implements MongoCollection<Document> {
 
-    private MongoCollection<T> delegate;
+    private MongoCollection<Document> delegate;
 
     @Inject
     private TransactionData transactionData;
 
     public CompensatableMongoCollection() {
-
+        // Should only be invoked by CDI
     }
 
-    public CompensatableMongoCollection(final MongoCollection<T> delegate) {
-        this.delegate = delegate;
-    }
-
-    public void setDelegate(final MongoCollection delegate) {
+    public void setDelegate(final MongoCollection<Document> delegate) {
         this.delegate = delegate;
     }
 
@@ -59,17 +53,12 @@ public class CompensatableMongoCollection<T> implements MongoCollection<T> {
 
     @Override
     @TxConfirm(value = InsertConfirmationHandler.class)
-    public void insertOne(T document) {
+    public void insertOne(Document document) {
         // TODO move to the better place
         final TransactionData transactionData = new TransactionData("dummyTransactionId", null, document.toString());
 
-        if (document instanceof Document) {
-            ((Document) document).put("txinfo", transactionData.toString());
-        } else if (document instanceof BsonDocument) {
-            ((BsonDocument) document).put("txinfo", new BsonString(transactionData.toString()));
-        }
-
-        delegate.insertOne(document);
+        document.put("txinfo", transactionData.toString());
+        delegate.insertOne((Document) document);
     }
 
     @Override
@@ -79,43 +68,43 @@ public class CompensatableMongoCollection<T> implements MongoCollection<T> {
     }
 
     @Override
-    public MongoCollection<T> withCodecRegistry(CodecRegistry codecRegistry) {
+    public MongoCollection<Document> withCodecRegistry(CodecRegistry codecRegistry) {
         // TODO
         return delegate.withCodecRegistry(codecRegistry);
     }
 
     @Override
-    public MongoCollection<T> withReadPreference(ReadPreference readPreference) {
+    public MongoCollection<Document> withReadPreference(ReadPreference readPreference) {
         // TODO
         return delegate.withReadPreference(readPreference);
     }
 
     @Override
-    public MongoCollection<T> withWriteConcern(WriteConcern writeConcern) {
+    public MongoCollection<Document> withWriteConcern(WriteConcern writeConcern) {
         // TODO
         return delegate.withWriteConcern(writeConcern);
     }
 
     @Override
-    public BulkWriteResult bulkWrite(List<? extends WriteModel<? extends T>> requests) {
+    public BulkWriteResult bulkWrite(List<? extends WriteModel<? extends Document>> requests) {
         // TODO
         return delegate.bulkWrite(requests);
     }
 
     @Override
-    public BulkWriteResult bulkWrite(List<? extends WriteModel<? extends T>> requests, BulkWriteOptions options) {
+    public BulkWriteResult bulkWrite(List<? extends WriteModel<? extends Document>> requests, BulkWriteOptions options) {
         // TODO
         return delegate.bulkWrite(requests, options);
     }
 
     @Override
-    public void insertMany(List<? extends T> documents) {
+    public void insertMany(List<? extends Document> documents) {
         // TODO
         delegate.insertMany(documents);
     }
 
     @Override
-    public void insertMany(List<? extends T> documents, InsertManyOptions options) {
+    public void insertMany(List<? extends Document> documents, InsertManyOptions options) {
         // TODO
         delegate.insertMany(documents, options);
     }
@@ -133,13 +122,13 @@ public class CompensatableMongoCollection<T> implements MongoCollection<T> {
     }
 
     @Override
-    public UpdateResult replaceOne(Object filter, T replacement) {
+    public UpdateResult replaceOne(Object filter, Document replacement) {
         // TODO
         return delegate.replaceOne(filter, replacement);
     }
 
     @Override
-    public UpdateResult replaceOne(Object filter, T replacement, UpdateOptions updateOptions) {
+    public UpdateResult replaceOne(Object filter, Document replacement, UpdateOptions updateOptions) {
         // TODO
         return delegate.replaceOne(filter, replacement, updateOptions);
     }
@@ -169,37 +158,37 @@ public class CompensatableMongoCollection<T> implements MongoCollection<T> {
     }
 
     @Override
-    public T findOneAndDelete(Object filter) {
+    public Document findOneAndDelete(Object filter) {
         // TODO
         return delegate.findOneAndDelete(filter);
     }
 
     @Override
-    public T findOneAndDelete(Object filter, FindOneAndDeleteOptions options) {
+    public Document findOneAndDelete(Object filter, FindOneAndDeleteOptions options) {
         // TODO
         return delegate.findOneAndDelete(filter, options);
     }
 
     @Override
-    public T findOneAndReplace(Object filter, T replacement) {
+    public Document findOneAndReplace(Object filter, Document replacement) {
         // TODO
         return delegate.findOneAndReplace(filter, replacement);
     }
 
     @Override
-    public T findOneAndReplace(Object filter, T replacement, FindOneAndReplaceOptions options) {
+    public Document findOneAndReplace(Object filter, Document replacement, FindOneAndReplaceOptions options) {
         // TODO
         return delegate.findOneAndReplace(filter, replacement, options);
     }
 
     @Override
-    public T findOneAndUpdate(Object filter, Object update) {
+    public Document findOneAndUpdate(Object filter, Object update) {
         // TODO
         return delegate.findOneAndUpdate(filter, update);
     }
 
     @Override
-    public T findOneAndUpdate(Object filter, Object update, FindOneAndUpdateOptions options) {
+    public Document findOneAndUpdate(Object filter, Object update, FindOneAndUpdateOptions options) {
         // TODO
         return delegate.findOneAndUpdate(filter, update, options);
     }
@@ -213,7 +202,7 @@ public class CompensatableMongoCollection<T> implements MongoCollection<T> {
     }
 
     @Override
-    public Class<T> getDefaultClass() {
+    public Class<Document> getDefaultClass() {
         return delegate.getDefaultClass();
     }
 
@@ -258,7 +247,7 @@ public class CompensatableMongoCollection<T> implements MongoCollection<T> {
     }
 
     @Override
-    public FindFluent<T> find() {
+    public FindFluent<Document> find() {
         return delegate.find();
     }
 
@@ -268,7 +257,7 @@ public class CompensatableMongoCollection<T> implements MongoCollection<T> {
     }
 
     @Override
-    public FindFluent<T> find(Object filter) {
+    public FindFluent<Document> find(Object filter) {
         return delegate.find(filter);
     }
 

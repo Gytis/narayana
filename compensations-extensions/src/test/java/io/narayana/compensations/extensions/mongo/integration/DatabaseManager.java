@@ -1,9 +1,7 @@
 package io.narayana.compensations.extensions.mongo.integration;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoDatabase;
-import org.bson.BsonDocument;
-import org.bson.BsonString;
+import com.mongodb.client.MongoCollection;
+import io.narayana.compensations.extensions.mongo.CollectionConfiguration;
 import org.bson.Document;
 import org.jboss.narayana.compensations.api.TxCompensate;
 import org.jboss.narayana.compensations.api.TxConfirm;
@@ -20,31 +18,22 @@ public class DatabaseManager {
 
     private static final String COLLECTION_NAME = "test";
 
-    private final MongoDatabase database;
-
     @Inject
-    public DatabaseManager(final MongoClient client) {
-        database = client.getDatabase(DB_NAME);
-    }
+    @CollectionConfiguration(databaseName = "testdb", collectionName = "test")
+    private MongoCollection<Document> collection;
 
     @TxCompensate(InsertCompensationHandler.class)
     @TxConfirm(InsertConfirmationHandler.class)
-    public void insertDocument(final String key, final String value) {
-        database.getCollection(COLLECTION_NAME).insertOne(new Document(key, value));
-    }
-
-    @TxCompensate(InsertCompensationHandler.class)
-    @TxConfirm(InsertConfirmationHandler.class)
-    public void insertBsonDocument(final String key, final String value) {
-        database.getCollection(COLLECTION_NAME, BsonDocument.class).insertOne(new BsonDocument(key, new BsonString(value)));
+    public void insert(final String key, final String value) {
+        collection.insertOne(new Document(key, value));
     }
 
     public Iterator<Document> getAll() {
-        return database.getCollection(COLLECTION_NAME).find().iterator();
+        return collection.find().iterator();
     }
 
     public void clear() {
-        database.getCollection(COLLECTION_NAME).dropCollection();
+        collection.dropCollection();
     }
 
 }
