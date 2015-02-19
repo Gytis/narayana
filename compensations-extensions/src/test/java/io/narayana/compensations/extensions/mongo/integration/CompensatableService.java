@@ -3,6 +3,7 @@ package io.narayana.compensations.extensions.mongo.integration;
 import org.jboss.narayana.compensations.api.Compensatable;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -16,10 +17,12 @@ public class CompensatableService {
     private DatabaseManager databaseManager;
 
     @Compensatable
-    public void execute() {
+    public void execute(final String key, final List<String> values) {
         INVOCATIONS_COUNTER.incrementAndGet();
-        databaseManager.insert("test", "1");
-        databaseManager.insert("test", "2");
+
+        for (final String value : values) {
+            databaseManager.insert(key, value);
+        }
     }
 
 }
