@@ -16,9 +16,9 @@ import java.lang.annotation.Target;
 public @interface CollectionConfiguration {
 
     @Nonbinding
-    String databaseName() default "";
+    String databaseName();
 
     @Nonbinding
-    String collectionName() default "";
+    String collectionName();
 
 }

@@ -16,7 +16,7 @@ public class CompensatableMongoCollectionFactory {
     private MongoClient mongoClient;
 
     @Produces
-    @CollectionConfiguration
+    @CollectionConfiguration(collectionName = "", databaseName = "")
     public MongoCollection<Document> getMongoCollection(InjectionPoint injectionPoint,
             @New CompensatableMongoCollection compensatableMongoCollection) {
 
