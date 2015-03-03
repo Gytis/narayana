@@ -24,12 +24,14 @@ import com.mongodb.client.model.WriteModel;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import io.narayana.compensations.extensions.mongo.handlers.InsertConfirmationHandler;
+import io.narayana.compensations.extensions.mongo.handlers.InsertHandlerData;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.jboss.narayana.compensations.api.TxConfirm;
 import org.jboss.narayana.compensations.impl.BAControler;
 import org.jboss.narayana.compensations.impl.BAControllerFactory;
 
+import javax.inject.Inject;
 import java.util.List;
 
 /**
@@ -37,7 +39,14 @@ import java.util.List;
  */
 public class CompensatableMongoCollection implements MongoCollection<Document> {
 
+    @Inject
+    private InsertHandlerData insertHandlerData;
+
     private MongoCollection<Document> delegate;
+
+    private String databaseName;
+
+    private String collectionName;
 
     public CompensatableMongoCollection() {
         // Should only be invoked by CDI
@@ -47,10 +56,18 @@ public class CompensatableMongoCollection implements MongoCollection<Document> {
         this.delegate = delegate;
     }
 
+    public void setDatabaseName(final String databaseName) {
+        this.databaseName = databaseName;
+    }
+
+    public void setCollectionName(final String collectionName) {
+        this.collectionName = collectionName;
+    }
+
     // Decorated methods
 
     @Override
-    @TxConfirm(value = InsertConfirmationHandler.class)
+    @TxConfirm(InsertConfirmationHandler.class)
     public void insertOne(Document document) {
         // TODO move to the better place
         final BAControler baControler = BAControllerFactory.getInstance();
@@ -61,6 +78,9 @@ public class CompensatableMongoCollection implements MongoCollection<Document> {
                 final TransactionData transactionData = new TransactionData(currentTransaction.toString(), null,
                         document.toString());
                 document.put("txinfo", transactionData.toDocument());
+
+                insertHandlerData.setTransactionId(currentTransaction.toString());
+                insertHandlerData.addCollectionInfo(new CollectionInfo(databaseName, collectionName));
             } catch (final Exception e) {
                 throw new RuntimeException("Failed to get currently running transaction", e);
             }

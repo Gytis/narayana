@@ -3,8 +3,6 @@ package io.narayana.compensations.extensions.mongo.integration;
 import com.mongodb.client.MongoCollection;
 import io.narayana.compensations.extensions.mongo.CollectionConfiguration;
 import org.bson.Document;
-import org.jboss.narayana.compensations.api.TxCompensate;
-import org.jboss.narayana.compensations.api.TxConfirm;
 
 import javax.inject.Inject;
 import java.util.Iterator;
@@ -22,8 +20,9 @@ public class DatabaseManager {
     @CollectionConfiguration(databaseName = "testdb", collectionName = "test")
     private MongoCollection<Document> collection;
 
-    @TxCompensate(InsertCompensationHandler.class)
-    @TxConfirm(InsertConfirmationHandler.class)
+    // TODO skipping these, because of a possible bug in handling CompensationContext
+//    @TxCompensate(InsertCompensationHandler.class)
+//    @TxConfirm(InsertConfirmationHandler.class)
     public void insert(final String key, final String value) {
         collection.insertOne(new Document(key, value));
     }

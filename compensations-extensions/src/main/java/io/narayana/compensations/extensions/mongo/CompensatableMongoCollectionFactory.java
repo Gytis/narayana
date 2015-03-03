@@ -31,6 +31,8 @@ public class CompensatableMongoCollectionFactory {
                 .getCollection(collectionConfiguration.collectionName());
 
         compensatableMongoCollection.setDelegate(delegate);
+        compensatableMongoCollection.setDatabaseName(collectionConfiguration.databaseName());
+        compensatableMongoCollection.setCollectionName(collectionConfiguration.collectionName());
 
         return compensatableMongoCollection;
     }
