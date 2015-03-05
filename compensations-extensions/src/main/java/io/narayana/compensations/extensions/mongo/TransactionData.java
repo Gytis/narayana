@@ -1,5 +1,8 @@
 package io.narayana.compensations.extensions.mongo;
 
+import org.bson.BsonDateTime;
+import org.bson.BsonDocument;
+import org.bson.BsonString;
 import org.bson.Document;
 
 import java.io.Serializable;
@@ -65,12 +68,34 @@ public class TransactionData implements Serializable {
                 getClass().getSimpleName(), transactionId, originalState, newState, timestampString);
     }
 
+    @Deprecated
     public Document toDocument() {
         final Document document = new Document();
         document.put("transactionId", transactionId);
         document.put("originalState", originalState);
         document.put("newState", newState);
         document.put("timestamp", timestamp);
+
+        return document;
+    }
+
+    public BsonDocument toBsonDocument() {
+        final BsonDocument document = new BsonDocument();
+        document.append("transactionId", new BsonString(transactionId));
+
+        if (originalState == null) {
+            document.append("originalState", new BsonString("null"));
+        } else {
+            document.append("originalState", new BsonString(originalState));
+        }
+
+        if (newState == null) {
+            document.append("newState", new BsonString("null"));
+        } else {
+            document.append("newState", new BsonString(newState));
+        }
+
+        document.append("timestamp", new BsonDateTime(timestamp.getTime()));
 
         return document;
     }
