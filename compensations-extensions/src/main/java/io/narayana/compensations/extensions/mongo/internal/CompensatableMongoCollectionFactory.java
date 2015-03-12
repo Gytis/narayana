@@ -1,7 +1,9 @@
-package io.narayana.compensations.extensions.mongo;
+package io.narayana.compensations.extensions.mongo.internal;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+import io.narayana.compensations.extensions.mongo.CollectionConfiguration;
+import io.narayana.compensations.extensions.mongo.internal.CompensatableMongoCollection;
 import org.bson.Document;
 
 import javax.enterprise.inject.New;

@@ -1,4 +1,4 @@
-package io.narayana.compensations.extensions.mongo;
+package io.narayana.compensations.extensions.mongo.internal;
 
 import javax.interceptor.InterceptorBinding;
 import java.lang.annotation.ElementType;

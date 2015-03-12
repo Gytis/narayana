@@ -1,6 +1,6 @@
 package io.narayana.compensations.extensions.mongo.unit;
 
-import io.narayana.compensations.extensions.mongo.TransactionData;
+import io.narayana.compensations.extensions.mongo.internal.TransactionData;
 import org.bson.BsonDateTime;
 import org.bson.BsonDocument;
 import org.bson.BsonString;

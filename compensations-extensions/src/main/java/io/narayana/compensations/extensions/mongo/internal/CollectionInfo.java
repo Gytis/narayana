@@ -1,4 +1,4 @@
-package io.narayana.compensations.extensions.mongo;
+package io.narayana.compensations.extensions.mongo.internal;
 
 import java.io.Serializable;
 

@@ -1,4 +1,4 @@
-package io.narayana.compensations.extensions.mongo;
+package io.narayana.compensations.extensions.mongo.internal;
 
 import com.mongodb.MongoNamespace;
 import com.mongodb.ReadPreference;
@@ -22,8 +22,8 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.WriteModel;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
-import io.narayana.compensations.extensions.mongo.handlers.InsertCompensationHandler;
-import io.narayana.compensations.extensions.mongo.handlers.InsertConfirmationHandler;
+import io.narayana.compensations.extensions.mongo.internal.handlers.InsertCompensationHandler;
+import io.narayana.compensations.extensions.mongo.internal.handlers.InsertConfirmationHandler;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;

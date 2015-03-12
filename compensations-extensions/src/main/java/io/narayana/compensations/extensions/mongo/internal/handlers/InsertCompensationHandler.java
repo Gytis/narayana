@@ -1,10 +1,10 @@
-package io.narayana.compensations.extensions.mongo.handlers;
+package io.narayana.compensations.extensions.mongo.internal.handlers;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import io.narayana.compensations.extensions.mongo.CollectionInfo;
-import io.narayana.compensations.extensions.mongo.TransactionData;
+import io.narayana.compensations.extensions.mongo.internal.CollectionInfo;
+import io.narayana.compensations.extensions.mongo.internal.TransactionData;
 import org.bson.Document;
 import org.jboss.logging.Logger;
 import org.jboss.narayana.compensations.api.CompensationHandler;

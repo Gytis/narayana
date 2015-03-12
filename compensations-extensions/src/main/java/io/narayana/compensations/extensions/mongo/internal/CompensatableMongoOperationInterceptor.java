@@ -1,6 +1,6 @@
-package io.narayana.compensations.extensions.mongo;
+package io.narayana.compensations.extensions.mongo.internal;
 
-import io.narayana.compensations.extensions.mongo.handlers.InsertHandlerData;
+import io.narayana.compensations.extensions.mongo.internal.handlers.InsertHandlerData;
 import org.bson.BsonDocument;
 import org.bson.BsonDocumentReader;
 import org.bson.BsonDocumentWrapper;

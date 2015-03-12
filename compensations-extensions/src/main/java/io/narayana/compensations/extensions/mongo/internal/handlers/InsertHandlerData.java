@@ -1,6 +1,6 @@
-package io.narayana.compensations.extensions.mongo.handlers;
+package io.narayana.compensations.extensions.mongo.internal.handlers;
 
-import io.narayana.compensations.extensions.mongo.CollectionInfo;
+import io.narayana.compensations.extensions.mongo.internal.CollectionInfo;
 import org.jboss.narayana.compensations.api.CompensationScoped;
 import org.jboss.weld.util.collections.ArraySet;
 
