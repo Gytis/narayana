@@ -15,7 +15,7 @@
 
     <!-- TODO move to the root pom -->
     <properties>
-        <version.org.mongodb>3.0.0-beta3</version.org.mongodb>
+        <version.org.mongodb>2.12.4</version.org.mongodb>
         <version.org.jboss.shrinkwrap.resolver>2.1.1</version.org.jboss.shrinkwrap.resolver>
     </properties>
 
@@ -24,17 +24,27 @@
             <groupId>org.jboss.narayana.compensations</groupId>
             <artifactId>compensations</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
             <version>${version.org.mongodb}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>
             <version>${version.org.jboss.logging.jboss-logging}</version>
+            <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.javaee.nosql</groupId>
+            <artifactId>mongodb</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

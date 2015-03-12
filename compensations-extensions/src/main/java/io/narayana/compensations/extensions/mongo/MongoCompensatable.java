@@ -1,8 +1,8 @@
 package io.narayana.compensations.extensions.mongo;
 
-import javax.enterprise.util.Nonbinding;
-import javax.inject.Qualifier;
+import javax.interceptor.InterceptorBinding;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -10,15 +10,9 @@ import java.lang.annotation.Target;
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-@Qualifier
+@Inherited
+@InterceptorBinding
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
-public @interface CollectionConfiguration {
-
-    @Nonbinding
-    String databaseName();
-
-    @Nonbinding
-    String collectionName();
-
+@Target({ElementType.FIELD, ElementType.TYPE})
+public @interface MongoCompensatable {
 }
