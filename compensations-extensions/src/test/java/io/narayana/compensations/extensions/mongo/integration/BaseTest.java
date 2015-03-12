@@ -56,13 +56,13 @@ public class BaseTest {
             final Document document = iterator.next();
             final Object txInfo = document.get(TRANSACTION_DATA_COLUMN_NAME);
 
-            Assert.assertTrue(txInfo instanceof Document);
-            Assert.assertEquals(transactionId, ((Document) txInfo).getString("transactionId"));
+            Assert.assertTrue(TRANSACTION_DATA_COLUMN_NAME + " record is of invalid type", txInfo instanceof Document);
+            Assert.assertEquals("Transaction ids should match", transactionId, ((Document) txInfo).getString("transactionId"));
 
             remainingValues.remove(document.getString(key));
         }
 
-        Assert.assertTrue(remainingValues.isEmpty());
+        Assert.assertTrue("Not all expected values were found in the database", remainingValues.isEmpty());
     }
 
     protected void assertDatabaseEntriesWithoutTransactionData(final String key, final List<String> expectedValues,
@@ -74,7 +74,7 @@ public class BaseTest {
             final Document document = iterator.next();
             final Object txInfo = document.get(TRANSACTION_DATA_COLUMN_NAME);
 
-            Assert.assertNull(txInfo);
+            Assert.assertNull(TRANSACTION_DATA_COLUMN_NAME + " record should be removed", txInfo);
 
             remainingValues.remove(document.getString(key));
         }

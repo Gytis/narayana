@@ -22,10 +22,12 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.WriteModel;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+import io.narayana.compensations.extensions.mongo.handlers.InsertCompensationHandler;
 import io.narayana.compensations.extensions.mongo.handlers.InsertConfirmationHandler;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
+import org.jboss.narayana.compensations.api.TxCompensate;
 import org.jboss.narayana.compensations.api.TxConfirm;
 
 import java.util.List;
@@ -68,6 +70,7 @@ public class CompensatableMongoCollection<TDocument> implements MongoCollection<
     @Override
     @CompensatableMongoOperation
     @TxConfirm(InsertConfirmationHandler.class)
+    @TxCompensate(InsertCompensationHandler.class)
     public void insertOne(final TDocument document) {
         delegate.insertOne(document);
     }

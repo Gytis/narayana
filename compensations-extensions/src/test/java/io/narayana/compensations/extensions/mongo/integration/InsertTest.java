@@ -69,7 +69,27 @@ public class InsertTest extends BaseTest {
 
         BAControllerFactory.getInstance().cancelBusinessActivity();
 
+        Assert.assertFalse("Entries should be removed by compensation handler", databaseManager.getEntries().hasNext());
+    }
+
+    @Test
+    public void testCompensateModifiedDocument() throws Exception {
+        final String key = "test";
+        final List<String> values = Arrays.asList("5", "6");
+
+        BAControllerFactory.getInstance().beginBusinessActivity();
+
+        databaseManager.insert(key, values.get(0));
+        databaseManager.insert(key, values.get(1));
+
+        final String transactionId = BAControllerFactory.getInstance().getCurrentTransaction().toString();
         assertDatabaseEntriesWithTransactionData(key, values, databaseManager.getEntries(), transactionId);
+
+        databaseManager.updateWithoutTransaction(key, values.get(1), key, "7");
+
+        BAControllerFactory.getInstance().cancelBusinessActivity();
+
+        assertDatabaseEntriesWithTransactionData(key, Arrays.asList("7"), databaseManager.getEntries(), transactionId);
     }
 
 }
