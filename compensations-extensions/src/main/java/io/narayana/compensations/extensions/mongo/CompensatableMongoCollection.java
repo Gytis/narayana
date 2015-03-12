@@ -23,17 +23,10 @@ import com.mongodb.client.model.WriteModel;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import io.narayana.compensations.extensions.mongo.handlers.InsertConfirmationHandler;
-import org.bson.BsonDocument;
-import org.bson.BsonDocumentReader;
-import org.bson.BsonDocumentWrapper;
-import org.bson.BsonString;
 import org.bson.Document;
-import org.bson.codecs.DecoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
 import org.jboss.narayana.compensations.api.TxConfirm;
-import org.jboss.narayana.compensations.impl.BAControler;
-import org.jboss.narayana.compensations.impl.BAControllerFactory;
 
 import java.util.List;
 
@@ -41,9 +34,6 @@ import java.util.List;
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 public class CompensatableMongoCollection<TDocument> implements MongoCollection<TDocument> {
-
-//    @Inject
-//    private InsertHandlerData insertHandlerData;
 
     private MongoCollection<TDocument> delegate;
 
@@ -75,62 +65,10 @@ public class CompensatableMongoCollection<TDocument> implements MongoCollection<
         this.collectionName = collectionName;
     }
 
-//    @Override
-//    public void insertOne(final TDocument document) {
-//        delegate.insertOne(document);
-//    }
-
-    /**
-     * TODO move to the better place
-     */
-    private TDocument appendTransactionData(final TDocument document) {
-        final BAControler baController = BAControllerFactory.getInstance();
-
-        if (!baController.isBARunning()) {
-            return document;
-        }
-
-        final String transactionId;
-        try {
-            transactionId = baController.getCurrentTransaction().toString();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to get currently running transaction", e);
-        }
-
-        final BsonDocument bsonDocument = BsonDocumentWrapper.asBsonDocument(document, getCodecRegistry());
-        bsonDocument.put("txinfo", new BsonString(transactionId));
-
-        return getCodecRegistry().get(getDocumentClass()).decode(new BsonDocumentReader(bsonDocument), DecoderContext.builder().build());
-
-
-//        if (bsonDocument instanceof BsonDocumentWrapper) {
-//            return ((BsonDocumentWrapper<TDocument>) bsonDocument).getWrappedDocument();
-//        } else {
-//            return (TDocument) bsonDocument;
-//        }
-
-//        try {
-//            final Object currentTransaction = baController.getCurrentTransaction();
-//            final TransactionData transactionData = new TransactionData(currentTransaction.toString(), null,
-//                    document.toString());
-//
-////                document.put("txinfo", transactionData.toDocument());
-//
-//                insertHandlerData.setTransactionId(currentTransaction.toString());
-//                insertHandlerData.addCollectionInfo(new CollectionInfo(databaseName, collectionName));
-//            } catch (final Exception e) {
-//                throw new RuntimeException("Failed to get currently running transaction", e);
-//            }
-//        }
-    }
-
     @Override
     @CompensatableMongoOperation
     @TxConfirm(InsertConfirmationHandler.class)
     public void insertOne(final TDocument document) {
-//        final TDocument updatedDocument = appendTransactionData(document);
-
-        System.out.println("Inserting document: " + document);
         delegate.insertOne(document);
     }
 

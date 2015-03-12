@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -24,76 +25,71 @@ public class TransactionDataTest {
 
     @Test
     public void testToString() {
-        final Date date = new Date();
-        final TransactionData transactionData = new TransactionData("dummyTransactionData", "dummyOriginalState",
-                "dummyNewState", date);
+        final TransactionData transactionData = getTransactionData(true, true, true, true);
+        final String expectedString = String.format("<%s: transactionId=%s, originalState=%s, newState=%s, timestamp=%s>",
+                TransactionData.class.getSimpleName(), transactionData.getTransactionId(),
+                transactionData.getOriginalState(), transactionData.getNewState(),
+                transactionData.getTimestamp().getTime());
 
-        Assert.assertEquals("<TransactionData: transactionId=dummyTransactionData, originalState=dummyOriginalState, " +
-                "newState=dummyNewState, timestamp=" + date.getTime() + ">", transactionData.toString());
+        Assert.assertEquals(expectedString, transactionData.toString());
     }
 
     @Test
     public void testToStringWithoutOriginalState() {
-        final Date date = new Date();
-        final TransactionData transactionData = new TransactionData("dummyTransactionData", null,
-                "dummyNewState", date);
+        final TransactionData transactionData = getTransactionData(true, false, true, true);
+        final String expectedString = String.format("<%s: transactionId=%s, originalState=null, newState=%s, timestamp=%s>",
+                TransactionData.class.getSimpleName(), transactionData.getTransactionId(),
+                transactionData.getNewState(), transactionData.getTimestamp().getTime());
 
-        Assert.assertEquals("<TransactionData: transactionId=dummyTransactionData, originalState=null, " +
-                "newState=dummyNewState, timestamp=" + date.getTime() + ">", transactionData.toString());
+        Assert.assertEquals(expectedString, transactionData.toString());
     }
 
     @Test
     public void testToStringWithoutNewState() {
-        final Date date = new Date();
-        final TransactionData transactionData = new TransactionData("dummyTransactionData", "dummyOriginalState", null,
-                date);
+        final TransactionData transactionData = getTransactionData(true, true, false, true);
+        final String expectedString = String.format("<%s: transactionId=%s, originalState=%s, newState=null, timestamp=%s>",
+                TransactionData.class.getSimpleName(), transactionData.getTransactionId(),
+                transactionData.getOriginalState(), transactionData.getTimestamp().getTime());
 
-        Assert.assertEquals("<TransactionData: transactionId=dummyTransactionData, originalState=dummyOriginalState, " +
-                "newState=null, timestamp=" + date.getTime() + ">", transactionData.toString());
+        Assert.assertEquals(expectedString, transactionData.toString());
     }
 
     @Test
     public void testToBsonDocument() {
-        final Date date = new Date();
-        final TransactionData transactionData = new TransactionData("dummyTransactionData", "dummyOriginalState",
-                "dummyNewState", date);
-        final BsonDocument bsonDocument = new BsonDocument("transactionId", new BsonString("dummyTransactionData"))
-                .append("originalState", new BsonString("dummyOriginalState"))
-                .append("newState", new BsonString("dummyNewState"))
-                .append("timestamp", new BsonDateTime(date.getTime()));
+        final TransactionData transactionData = getTransactionData(true, true, true, true);
+        final BsonDocument bsonDocument = new BsonDocument("transactionId", new BsonString(transactionData.getTransactionId()))
+                .append("originalState", new BsonString(transactionData.getOriginalState()))
+                .append("newState", new BsonString(transactionData.getNewState()))
+                .append("timestamp", new BsonDateTime(transactionData.getTimestamp().getTime()));
 
         Assert.assertEquals(bsonDocument, transactionData.toBsonDocument());
     }
 
     @Test
     public void testToBsonDocumentWithoutOriginalState() {
-        final Date date = new Date();
-        final TransactionData transactionData = new TransactionData("dummyTransactionData", null, "dummyNewState", date);
-        final BsonDocument bsonDocument = new BsonDocument("transactionId", new BsonString("dummyTransactionData"))
+        final TransactionData transactionData = getTransactionData(true, false, true, true);
+        final BsonDocument bsonDocument = new BsonDocument("transactionId", new BsonString(transactionData.getTransactionId()))
                 .append("originalState", new BsonString("null"))
-                .append("newState", new BsonString("dummyNewState"))
-                .append("timestamp", new BsonDateTime(date.getTime()));
+                .append("newState", new BsonString(transactionData.getNewState()))
+                .append("timestamp", new BsonDateTime(transactionData.getTimestamp().getTime()));
 
         Assert.assertEquals(bsonDocument, transactionData.toBsonDocument());
     }
 
     @Test
     public void testToBsonDocumentWithoutNewState() {
-        final Date date = new Date();
-        final TransactionData transactionData = new TransactionData("dummyTransactionData", "dummyOriginalState", null,
-                date);
-        final BsonDocument bsonDocument = new BsonDocument("transactionId", new BsonString("dummyTransactionData"))
-                .append("originalState", new BsonString("dummyOriginalState"))
+        final TransactionData transactionData = getTransactionData(true, true, false, true);
+        final BsonDocument bsonDocument = new BsonDocument("transactionId", new BsonString(transactionData.getTransactionId()))
+                .append("originalState", new BsonString(transactionData.getOriginalState()))
                 .append("newState", new BsonString("null"))
-                .append("timestamp", new BsonDateTime(date.getTime()));
+                .append("timestamp", new BsonDateTime(transactionData.getTimestamp().getTime()));
 
         Assert.assertEquals(bsonDocument, transactionData.toBsonDocument());
     }
 
     @Test
     public void testValueOf() {
-        final TransactionData transactionData = new TransactionData("dummyTransactionData", "dummyOriginalState",
-                "dummyNewState", new Date());
+        final TransactionData transactionData = getTransactionData(true, true, true, true);
         final TransactionData newTransactionData = TransactionData.valueOf(transactionData.toString());
 
         Assert.assertEquals(transactionData, newTransactionData);
@@ -101,8 +97,7 @@ public class TransactionDataTest {
 
     @Test
     public void testValueOfWithoutOriginalState() {
-        final TransactionData transactionData = new TransactionData("dummyTransactionData", null, "dummyNewState",
-                new Date());
+        final TransactionData transactionData = getTransactionData(true, false, true, true);
         final TransactionData newTransactionData = TransactionData.valueOf(transactionData.toString());
 
         Assert.assertEquals(transactionData, newTransactionData);
@@ -110,8 +105,7 @@ public class TransactionDataTest {
 
     @Test
     public void testValueOfWithoutNewState() {
-        final TransactionData transactionData = new TransactionData("dummyTransactionData", "dummyOriginalState", null,
-                new Date());
+        final TransactionData transactionData = getTransactionData(true, true, false, true);
         final TransactionData newTransactionData = TransactionData.valueOf(transactionData.toString());
 
         Assert.assertEquals(transactionData, newTransactionData);
@@ -119,10 +113,37 @@ public class TransactionDataTest {
 
     @Test
     public void testValueOfWithStates() {
-        final TransactionData transactionData = new TransactionData("dummyTransactionData", null, null, new Date());
+        final TransactionData transactionData = getTransactionData(true, false, false, true);
         final TransactionData newTransactionData = TransactionData.valueOf(transactionData.toString());
 
         Assert.assertEquals(transactionData, newTransactionData);
+    }
+
+    private TransactionData getTransactionData(final boolean withTransactionId, final boolean withOriginalState,
+            final boolean withNewState, final boolean withTimestamp) {
+
+        String transactionId = null;
+        String originalState = null;
+        String newState = null;
+        Date timestamp = null;
+
+        if (withTransactionId) {
+            transactionId = UUID.randomUUID().toString();
+        }
+
+        if (withOriginalState) {
+            originalState = "testOriginalState: " + new BsonString(UUID.randomUUID().toString());
+        }
+
+        if (withNewState) {
+            newState = "testNewState" + new BsonString(UUID.randomUUID().toString());
+        }
+
+        if (withTimestamp) {
+            timestamp = new Date();
+        }
+
+        return new TransactionData(transactionId, originalState, newState, timestamp);
     }
 
 }

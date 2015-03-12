@@ -1,5 +1,6 @@
 package io.narayana.compensations.extensions.mongo.integration;
 
+import io.narayana.compensations.extensions.mongo.TransactionData;
 import org.bson.Document;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.ArchivePaths;
@@ -23,7 +24,7 @@ public class BaseTest {
     private static final String MONGO_DRIVER_COORDINATES = "org.mongodb:mongo-java-driver:"
             + System.getProperty("version.org.mongodb");
 
-    private static final String TRANSACTION_DATA_COLUMN_NAME = "txinfo";
+    private static final String TRANSACTION_DATA_COLUMN_NAME = TransactionData.class.getSimpleName();
 
     @Deployment
     public static WebArchive getDeployment() {

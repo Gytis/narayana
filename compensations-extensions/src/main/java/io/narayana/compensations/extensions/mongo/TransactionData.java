@@ -3,7 +3,6 @@ package io.narayana.compensations.extensions.mongo;
 import org.bson.BsonDateTime;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
-import org.bson.Document;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -24,10 +23,7 @@ public class TransactionData implements Serializable {
     private Date timestamp;
 
     public TransactionData(final String transactionId, final String originalState, final String newState) {
-        this.transactionId = transactionId;
-        this.originalState = originalState;
-        this.newState = newState;
-        this.timestamp = new Date();
+        this(transactionId, originalState, newState, new Date());
     }
 
     public TransactionData(final String transactionId, final String originalState, final String newState,
@@ -68,20 +64,8 @@ public class TransactionData implements Serializable {
                 getClass().getSimpleName(), transactionId, originalState, newState, timestampString);
     }
 
-    @Deprecated
-    public Document toDocument() {
-        final Document document = new Document();
-        document.put("transactionId", transactionId);
-        document.put("originalState", originalState);
-        document.put("newState", newState);
-        document.put("timestamp", timestamp);
-
-        return document;
-    }
-
     public BsonDocument toBsonDocument() {
-        final BsonDocument document = new BsonDocument();
-        document.append("transactionId", new BsonString(transactionId));
+        final BsonDocument document = new BsonDocument("transactionId", new BsonString(transactionId));
 
         if (originalState == null) {
             document.append("originalState", new BsonString("null"));
@@ -125,21 +109,29 @@ public class TransactionData implements Serializable {
 
         return areEquals;
     }
+    // <%s: transactionId=%s, originalState=%s, newState=%s, timestamp=%s>
 
+    /**
+     * TODO it's very ugly now, so should be rewritten in the future.
+     * TODO is it OK to do this? What if originalState or newState will have same strings?
+     *
+     * @param s
+     * @return
+     */
     public static TransactionData valueOf(String s) {
-        s = s.substring(s.indexOf("=") + 1);
-        String transactionId = s.substring(0, s.indexOf(","));
+        s = s.substring(s.indexOf("transactionId=") + 14);
+        String transactionId = s.substring(0, s.indexOf(", originalState="));
         transactionId = ("null".equals(transactionId) ? null : transactionId);
 
-        s = s.substring(s.indexOf("=") + 1);
-        String originalState = s.substring(0, s.indexOf(","));
+        s = s.substring(s.indexOf("originalState=") + 14);
+        String originalState = s.substring(0, s.indexOf(", newState="));
         originalState = ("null".equals(originalState) ? null : originalState);
 
-        s = s.substring(s.indexOf("=") + 1);
-        String newState = s.substring(0, s.indexOf(","));
+        s = s.substring(s.indexOf("newState=") + 9);
+        String newState = s.substring(0, s.indexOf(", timestamp="));
         newState = ("null".equals(newState) ? null : newState);
 
-        s = s.substring(s.indexOf("=") + 1);
+        s = s.substring(s.indexOf("timestamp=") + 10);
         String timestampString = s.substring(0, s.indexOf(">"));
         long timestamp = ("null".equals(timestampString) ? 0 : Long.valueOf(timestampString));
 

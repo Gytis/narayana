@@ -4,6 +4,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import io.narayana.compensations.extensions.mongo.CollectionInfo;
+import io.narayana.compensations.extensions.mongo.TransactionData;
 import org.bson.Document;
 import org.jboss.logging.Logger;
 import org.jboss.narayana.compensations.api.ConfirmationHandler;
@@ -18,24 +19,31 @@ public class InsertConfirmationHandler implements ConfirmationHandler {
 
     private static final Logger LOGGER = Logger.getLogger(InsertConfirmationHandler.class);
 
+    private static final String TRANSACTION_DATA_COLUMN_NAME = TransactionData.class.getSimpleName();
+
     @Inject
     private InsertHandlerData insertHandlerData;
 
     @Override
     public void confirm() {
-        final Set<CollectionInfo> collectionInfoSet = insertHandlerData.getCollectionInfoSet();
+        final String transactionId = insertHandlerData.getTransactionId();
+        if (transactionId == null) {
+            return;
+        }
 
+        final Set<CollectionInfo> collectionInfoSet = insertHandlerData.getCollectionInfoSet();
         if (collectionInfoSet.isEmpty()) {
             return;
         }
 
+        // Not using injection, because transaction is not needed here
         final MongoClient mongoClient = new MongoClient();
 
-        for (final CollectionInfo collectionInfo : insertHandlerData.getCollectionInfoSet()) {
+        for (final CollectionInfo collectionInfo : collectionInfoSet) {
             final MongoDatabase database = mongoClient.getDatabase(collectionInfo.getDatabaseName());
             final MongoCollection<Document> collection = database.getCollection(collectionInfo.getCollectionName());
 
-            confirmCollection(collection, insertHandlerData.getTransactionId());
+            confirmCollection(collection, transactionId);
             insertHandlerData.removeCollectionInfo(collectionInfo);
         }
 
@@ -43,7 +51,7 @@ public class InsertConfirmationHandler implements ConfirmationHandler {
     }
 
     private void confirmCollection(final MongoCollection<Document> collection, final String transactionId) {
-        final Document filter = new Document("txinfo.transactionId", transactionId);
+        final Document filter = new Document(TRANSACTION_DATA_COLUMN_NAME + ".transactionId", transactionId);
 
         for (final Document document : collection.find(filter)) {
             confirmDocument(collection, document);
@@ -52,7 +60,7 @@ public class InsertConfirmationHandler implements ConfirmationHandler {
     }
 
     private void confirmDocument(final MongoCollection<Document> collection, final Document document) {
-        final Document updateQuery = new Document("$unset", new Document("txinfo", null));
+        final Document updateQuery = new Document("$unset", new Document(TRANSACTION_DATA_COLUMN_NAME, null));
         final Document updateFiler = new Document("_id", document.get("_id"));
 
         LOGGER.debug("Confirming transaction in document: " + document.get("_id"));
