@@ -8,6 +8,7 @@ import org.jboss.narayana.compensations.api.CompensationTransactionType;
 
 import javax.inject.Inject;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -19,20 +20,28 @@ public class DatabaseManager {
     private MongoCollection<Document> collection;
 
     @Compensatable
-    public void insert(final String key, final String value) {
-        collection.insertOne(new Document(key, value));
+    public void insert(final DatabaseEntry entry) {
+        collection.insertOne(new Document(entry.getKey(), entry.getValue()));
     }
 
     @Compensatable(CompensationTransactionType.NOT_SUPPORTED)
-    public void updateWithoutTransaction(final String key, final String value, final String newKey, final String newValue) {
-        final Document updateFiler = new Document(key, value);
-        final Document updateQuery = new Document("$set", new Document(newKey, newValue));
+    public void updateWithoutTransaction(final DatabaseEntry originalEntry, final DatabaseEntry newEntry) {
+        final Document updateFiler = new Document(originalEntry.getKey(), originalEntry.getValue());
+        final Document updateQuery = new Document("$set", new Document(newEntry.getKey(), newEntry.getValue()));
 
         collection.updateOne(updateFiler, updateQuery);
     }
 
-    public Iterator<Document> getEntries() {
-        return collection.find().iterator();
+    public Iterable<Document> getEntries() {
+        return collection.find();
+    }
+
+    public Iterable<Document> getEntries(final DatabaseEntry entry) {
+        return collection.find(new Document(entry.getKey(), entry.getValue()));
+    }
+
+    public long getCount() {
+        return collection.count();
     }
 
     public void clearEntries() {

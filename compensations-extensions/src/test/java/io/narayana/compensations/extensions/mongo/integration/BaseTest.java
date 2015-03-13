@@ -12,9 +12,6 @@ import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.Assert;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -48,39 +45,30 @@ public class BaseTest {
         return archive;
     }
 
-    protected void assertDatabaseEntriesWithTransactionData(final String key, final List<String> expectedValues,
-            final Iterator<Document> iterator, final String transactionId) throws Exception {
+    protected void assertDatabaseEntries(final String transactionId, final DatabaseManager databaseManager,
+            final DatabaseEntry... expectedEntries) {
 
-        final List<String> remainingValues = new ArrayList<>(expectedValues);
-
-        while (iterator.hasNext()) {
-            final Document document = iterator.next();
-            final Object txInfo = document.get(TRANSACTION_DATA_COLUMN_NAME);
-
-            Assert.assertTrue(TRANSACTION_DATA_COLUMN_NAME + " record is of invalid type", txInfo instanceof Document);
-            Assert.assertEquals("Transaction ids should match", transactionId, ((Document) txInfo).getString("transactionId"));
-
-            remainingValues.remove(document.getString(key));
+        for (final DatabaseEntry expectedEntry : expectedEntries) {
+            assertDatabaseEntry(transactionId, databaseManager, expectedEntry);
         }
-
-        Assert.assertTrue("Not all expected values were found in the database", remainingValues.isEmpty());
     }
 
-    protected void assertDatabaseEntriesWithoutTransactionData(final String key, final List<String> expectedValues,
-            final Iterator<Document> iterator) {
+    protected void assertDatabaseEntry(final String transactionId, final DatabaseManager databaseManager,
+            final DatabaseEntry expectedEntry) {
 
-        final List<String> remainingValues = new ArrayList<>(expectedValues);
+        for (final Document document : databaseManager.getEntries(expectedEntry)) {
+            Assert.assertEquals("Database entry contains unexpected value", expectedEntry.getValue(),
+                    document.getString(expectedEntry.getKey()));
 
-        while (iterator.hasNext()) {
-            final Document document = iterator.next();
-            final Object txInfo = document.get(TRANSACTION_DATA_COLUMN_NAME);
+            if (transactionId != null) {
+                final Object transactionData = document.get(TRANSACTION_DATA_COLUMN_NAME);
 
-            Assert.assertNull(TRANSACTION_DATA_COLUMN_NAME + " record should be removed", txInfo);
-
-            remainingValues.remove(document.getString(key));
+                Assert.assertTrue(TRANSACTION_DATA_COLUMN_NAME + " record is of invalid type",
+                        transactionData instanceof Document);
+                Assert.assertEquals("Transaction ids should match", transactionId,
+                        ((Document) transactionData).getString("transactionId"));
+            }
         }
-
-        Assert.assertTrue(remainingValues.isEmpty());
     }
 
 }

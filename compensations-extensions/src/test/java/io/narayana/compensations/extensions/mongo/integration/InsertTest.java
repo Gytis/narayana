@@ -9,8 +9,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -24,7 +22,7 @@ public class InsertTest extends BaseTest {
     @Before
     public void before() {
         databaseManager.clearEntries();
-        Assert.assertFalse(databaseManager.getEntries().hasNext());
+        Assert.assertEquals(0, databaseManager.getCount());
     }
 
     @After
@@ -38,58 +36,67 @@ public class InsertTest extends BaseTest {
 
     @Test
     public void testSuccess() throws Exception {
-        final String key = "test";
-        final List<String> values = Arrays.asList("1", "2");
+        final DatabaseEntry firstEntry = new DatabaseEntry("test", "1");
+        final DatabaseEntry secondEntry = new DatabaseEntry("test", "2");
 
         BAControllerFactory.getInstance().beginBusinessActivity();
 
-        databaseManager.insert(key, values.get(0));
-        databaseManager.insert(key, values.get(1));
+        databaseManager.insert(firstEntry);
+        databaseManager.insert(secondEntry);
 
         final String transactionId = BAControllerFactory.getInstance().getCurrentTransaction().toString();
-        assertDatabaseEntriesWithTransactionData(key, values, databaseManager.getEntries(), transactionId);
+
+        Assert.assertEquals(2, databaseManager.getCount());
+        assertDatabaseEntries(transactionId, databaseManager, firstEntry, secondEntry);
 
         BAControllerFactory.getInstance().closeBusinessActivity();
 
-        assertDatabaseEntriesWithoutTransactionData(key, values, databaseManager.getEntries());
+        Assert.assertEquals(2, databaseManager.getCount());
+        assertDatabaseEntries(null, databaseManager, firstEntry, secondEntry);
     }
 
     @Test
     public void testCompensate() throws Exception {
-        final String key = "test";
-        final List<String> values = Arrays.asList("3", "4");
+        final DatabaseEntry firstEntry = new DatabaseEntry("test", "3");
+        final DatabaseEntry secondEntry = new DatabaseEntry("test", "4");
 
         BAControllerFactory.getInstance().beginBusinessActivity();
 
-        databaseManager.insert(key, values.get(0));
-        databaseManager.insert(key, values.get(1));
+        databaseManager.insert(firstEntry);
+        databaseManager.insert(secondEntry);
 
         final String transactionId = BAControllerFactory.getInstance().getCurrentTransaction().toString();
-        assertDatabaseEntriesWithTransactionData(key, values, databaseManager.getEntries(), transactionId);
+
+        Assert.assertEquals(2, databaseManager.getCount());
+        assertDatabaseEntries(transactionId, databaseManager, firstEntry, secondEntry);
 
         BAControllerFactory.getInstance().cancelBusinessActivity();
 
-        Assert.assertFalse("Entries should be removed by compensation handler", databaseManager.getEntries().hasNext());
+        Assert.assertEquals("Entries should be removed by compensation handler", 0, databaseManager.getCount());
     }
 
     @Test
     public void testCompensateModifiedDocument() throws Exception {
-        final String key = "test";
-        final List<String> values = Arrays.asList("5", "6");
+        final DatabaseEntry firstEntry = new DatabaseEntry("test", "5");
+        final DatabaseEntry secondEntry = new DatabaseEntry("test", "6");
+        final DatabaseEntry thirdEntry = new DatabaseEntry("test", "7");
 
         BAControllerFactory.getInstance().beginBusinessActivity();
 
-        databaseManager.insert(key, values.get(0));
-        databaseManager.insert(key, values.get(1));
+        databaseManager.insert(firstEntry);
+        databaseManager.insert(secondEntry);
 
         final String transactionId = BAControllerFactory.getInstance().getCurrentTransaction().toString();
-        assertDatabaseEntriesWithTransactionData(key, values, databaseManager.getEntries(), transactionId);
 
-        databaseManager.updateWithoutTransaction(key, values.get(1), key, "7");
+        Assert.assertEquals(2, databaseManager.getCount());
+        assertDatabaseEntries(transactionId, databaseManager, firstEntry, secondEntry);
+
+        databaseManager.updateWithoutTransaction(secondEntry, thirdEntry);
 
         BAControllerFactory.getInstance().cancelBusinessActivity();
 
-        assertDatabaseEntriesWithTransactionData(key, Arrays.asList("7"), databaseManager.getEntries(), transactionId);
+        Assert.assertEquals(1, databaseManager.getCount());
+        assertDatabaseEntries(transactionId, databaseManager, thirdEntry);
     }
 
 }
