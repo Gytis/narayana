@@ -54,8 +54,6 @@ public class LoggingXAResource implements XAResource {
     public void end(Xid xid, int flags) throws XAException {
         String str = "LoggingXAResource.end";
 
-        invocations.add(str);
-
         LOG.info(str);
     }
 
@@ -72,8 +70,6 @@ public class LoggingXAResource implements XAResource {
     public int getTransactionTimeout() throws XAException {
         String str = "LoggingXAResource.getTransactionTimeout";
 
-        invocations.add(str);
-
         LOG.info(str);
 
         return 0;
@@ -82,8 +78,6 @@ public class LoggingXAResource implements XAResource {
     @Override
     public boolean isSameRM(XAResource xares) throws XAException {
         String str = "LoggingXAResource.isSameRM";
-
-        invocations.add(str);
 
         LOG.info(str);
 
@@ -125,8 +119,6 @@ public class LoggingXAResource implements XAResource {
     public boolean setTransactionTimeout(int seconds) throws XAException {
         String str = "LoggingXAResource.setTransactionTimeout";
 
-        invocations.add(str);
-
         LOG.info(str);
 
         return false;
@@ -135,8 +127,6 @@ public class LoggingXAResource implements XAResource {
     @Override
     public void start(Xid xid, int flags) throws XAException {
         String str = "LoggingXAResource.start";
-
-        invocations.add(str);
 
         LOG.info(str);
     }

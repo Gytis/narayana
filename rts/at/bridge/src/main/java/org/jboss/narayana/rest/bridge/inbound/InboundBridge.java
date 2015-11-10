@@ -238,8 +238,7 @@ public final class InboundBridge implements XAResource, SerializableXAResourceDe
         try {
             final int status = transaction.getStatus();
 
-            return status == Status.STATUS_ACTIVE || status == Status.STATUS_MARKED_ROLLBACK
-                    || status == Status.STATUS_COMMITTING;
+            return status != Status.STATUS_NO_TRANSACTION && status != Status.STATUS_UNKNOWN;
         } catch (SystemException e) {
             LOG.warn(e.getMessage());
             return false;
