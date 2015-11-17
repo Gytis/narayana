@@ -148,7 +148,7 @@ public abstract class AbstractTestCase {
         } catch (final Throwable t) {
             // ignore
         } finally {
-            clearObjectStore();
+//            clearObjectStore();
         }
     }
 

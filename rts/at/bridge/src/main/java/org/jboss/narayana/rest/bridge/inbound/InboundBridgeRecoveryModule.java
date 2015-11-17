@@ -21,16 +21,19 @@
  */
 package org.jboss.narayana.rest.bridge.inbound;
 
+import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.resource.spi.XATerminator;
 import javax.transaction.xa.XAException;
 
+import com.arjuna.ats.arjuna.exceptions.ObjectStoreException;
+import com.arjuna.ats.arjuna.state.OutputObjectState;
 import org.jboss.logging.Logger;
 
 import com.arjuna.ats.arjuna.common.Uid;
-import com.arjuna.ats.arjuna.objectstore.RecoveryStore;
 import com.arjuna.ats.arjuna.objectstore.StoreManager;
 import com.arjuna.ats.arjuna.recovery.RecoveryModule;
 import com.arjuna.ats.arjuna.state.InputObjectState;
@@ -92,7 +95,7 @@ public class InboundBridgeRecoveryModule implements RecoveryModule {
             LOG.trace("InboundBridgeRecoveryModule.periodicWorkSecondPass");
         }
 
-        recoveredBridges.clear();
+//        recoveredBridges.clear();
 
         final Set<Uid> uids = getUidsToRecover();
 
@@ -120,36 +123,42 @@ public class InboundBridgeRecoveryModule implements RecoveryModule {
             LOG.trace("InboundBridgeRecoveryModule.getUidsToRecover");
         }
 
-        final Set<Uid> uids = new HashSet<Uid>();
-
-        try {
-            final RecoveryStore recoveryStore = StoreManager.getRecoveryStore();
-            final InputObjectState states = new InputObjectState();
-
-            // Only look in the JCA section of the object store
-            if (recoveryStore.allObjUids(SubordinateAtomicAction.getType(), states) && states.notempty()) {
-                boolean finished = false;
-
-                do {
-                    final Uid uid = UidHelper.unpackFrom(states);
-
-                    if (uid.notEquals(Uid.nullUid())) {
-                        final SubordinateAtomicAction saa = new SubordinateAtomicAction(uid, true);
-                        if (saa.getXid().getFormatId() == InboundBridge.XARESOURCE_FORMAT_ID) {
-                            uids.add(uid);
-                        }
-
-                    } else {
-                        finished = true;
-                    }
-
-                } while (!finished);
-            }
-        } catch (Exception e) {
-            LOG.warn(e.getMessage(), e);
-        }
+        final Set<Uid> uids = new HashSet<>();
+        uids.addAll(getUidsFromTheStore(SubordinateAtomicAction.getType()));
+//        uids.addAll(getUidsFromTheStore("/StateManager/BasicAction/TwoPhaseCoordinator/AtomicAction"));
+        uids.addAll(getUidsFromTheStore(
+                "/StateManager/BasicAction/TwoPhaseCoordinator/ArjunaTransactionImple/ServerTransaction/JCA"));
+//        uids.addAll(getUidsFromTheStore("/CosTransactions/XAResourceRecord"));
 
         return uids;
+    }
+
+    private Set<Uid> getUidsFromTheStore(final String type) {
+        final InputObjectState states = new InputObjectState();
+
+        try {
+            if (!StoreManager.getRecoveryStore().allObjUids(type, states) || !states.notempty()) {
+                return Collections.emptySet();
+            }
+
+            final Set<Uid> uids = new HashSet<>();
+
+            do {
+                final Uid uid = UidHelper.unpackFrom(states);
+
+                if (uid.equals(Uid.nullUid())) {
+                    return uids;
+                }
+
+//                final SubordinateAtomicAction saa = new SubordinateAtomicAction(uid, true);
+//                if (saa.getXid().getFormatId() == InboundBridge.XARESOURCE_FORMAT_ID) {
+                    uids.add(uid);
+//                }
+            } while (true);
+        } catch (ObjectStoreException | IOException e) {
+            LOG.warn(e.getMessage(), e);
+            return Collections.emptySet();
+        }
     }
 
     /**
@@ -174,6 +183,66 @@ public class InboundBridgeRecoveryModule implements RecoveryModule {
                 }
             }
         }
+
+        recoveredBridges.clear();
     }
 
+    private void moveRecord(final Uid uid, final String from, final String to) {
+        final InputObjectState state = readState(uid, from);
+        if (state == null) {
+            return;
+        }
+        if (!writeState(uid, to, new OutputObjectState(state))) {
+            return;
+        }
+        removeState(uid, from);
+    }
+
+    private InputObjectState readState(final Uid uid, final String type) {
+        InputObjectState state = null;
+
+        try {
+            state = StoreManager.getRecoveryStore().read_committed(uid, type);
+        } catch (final ObjectStoreException e) {
+            LOG.warn(e.getMessage(), e);
+        }
+
+        if (state == null) {
+            LOG.warn("Failed to read state of uid=" + uid + " type=" + type);
+        }
+
+        return state;
+    }
+
+    private boolean writeState(final Uid uid, final String type, final OutputObjectState state) {
+        boolean result = false;
+
+        try {
+            result = StoreManager.getRecoveryStore().write_committed(uid, type, state);
+        } catch (final ObjectStoreException e) {
+            LOG.warn(e.getMessage(), e);
+        }
+
+        if (!result) {
+            LOG.warn("Failed to write state of uid=" + uid + " type=" + type);
+        }
+
+        return result;
+    }
+
+    private boolean removeState(final Uid uid, final String type) {
+        boolean result = false;
+
+        try {
+            result = StoreManager.getRecoveryStore().remove_committed(uid, type);
+        } catch (final ObjectStoreException e) {
+            LOG.warn(e.getMessage(), e);
+        }
+
+        if (!result) {
+            LOG.warn("Failed to remove state of uid=" + uid + " type=" + type);
+        }
+
+        return result;
+    }
 }

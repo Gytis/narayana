@@ -300,7 +300,11 @@ public class PeriodicRecovery extends Thread
    public void run ()
    {
        boolean finished = false;
-
+       try {
+           Thread.sleep(2000);
+       } catch (InterruptedException e) {
+           e.printStackTrace();
+       }
        do
        {
            boolean workToDo = false;
@@ -732,12 +736,30 @@ public class PeriodicRecovery extends Thread
         // for the same stable set of modules.
 
         Vector copyOfModules = getModules();
-        
+
         Enumeration modules = copyOfModules.elements();
+
+        while (modules.hasMoreElements()) {
+            RecoveryModule m = (RecoveryModule) modules.nextElement();
+            if (m.getClass().getSimpleName().equals("InboundBridgeRecoveryModule")) {
+                ClassLoader cl = switchClassLoader(m);
+                try {
+                    m.periodicWorkFirstPass();
+                } finally {
+                    restoreClassLoader(cl);
+                }
+            }
+        }
+
+        modules = copyOfModules.elements();
 
         while (modules.hasMoreElements())
         {
             RecoveryModule m = (RecoveryModule) modules.nextElement();
+
+            if (m.getClass().getSimpleName().equals("InboundBridgeRecoveryModule")) {
+                continue;
+            }
 
             // we need to ensure we use the class loader context of the recovery module while we are executing
             // its methods
@@ -784,9 +806,27 @@ public class PeriodicRecovery extends Thread
 
         modules = copyOfModules.elements();
 
+        while (modules.hasMoreElements()) {
+            RecoveryModule m = (RecoveryModule) modules.nextElement();
+            if (m.getClass().getSimpleName().equals("InboundBridgeRecoveryModule")) {
+                ClassLoader cl = switchClassLoader(m);
+                try {
+                    m.periodicWorkSecondPass();
+                } finally {
+                    restoreClassLoader(cl);
+                }
+            }
+        }
+
+        modules = copyOfModules.elements();
+
         while (modules.hasMoreElements())
         {
             RecoveryModule m = (RecoveryModule) modules.nextElement();
+
+            if (m.getClass().getSimpleName().equals("InboundBridgeRecoveryModule")) {
+                continue;
+            }
 
             ClassLoader cl = switchClassLoader(m);
             try {
