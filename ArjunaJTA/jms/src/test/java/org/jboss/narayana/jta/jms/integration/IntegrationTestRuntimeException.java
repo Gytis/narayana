@@ -19,52 +19,15 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.narayana.jta.jms;
-
-import org.jboss.logging.Logger;
-
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.transaction.Synchronization;
+package org.jboss.narayana.jta.jms.integration;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-public class ConnectionClosingSynchronization implements Synchronization {
+public class IntegrationTestRuntimeException extends RuntimeException {
 
-    private static final Logger LOGGER = Logger.getLogger(
-            ConnectionClosingSynchronization.class);
-
-    private final Connection connection;
-
-    public ConnectionClosingSynchronization(Connection connection) {
-        this.connection = connection;
-    }
-
-    @Override
-    public void beforeCompletion() {
-        // Nothing to do
-    }
-
-    @Override
-    public void afterCompletion(int status) {
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Closing connection " + connection);
-        }
-
-        try {
-            connection.close();
-        } catch (JMSException e) {
-            LOGGER.warn("Failed to close connection " + connection + ": "
-                    + e.getMessage());
-        }
-    }
-
-    /**
-     * Should only be used for testing.
-     */
-    Connection getConnection() {
-        return connection;
+    public IntegrationTestRuntimeException(String message) {
+        super(message);
     }
 
 }

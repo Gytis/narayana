@@ -19,52 +19,39 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.narayana.jta.jms;
+package org.jboss.narayana.jta.jms.helpers;
 
-import org.jboss.logging.Logger;
-
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.transaction.Synchronization;
+import com.arjuna.ats.arjuna.common.Uid;
+import com.arjuna.ats.arjuna.coordinator.ActionManager;
+import com.arjuna.ats.internal.arjuna.thread.ThreadActionData;
+import org.jboss.narayana.jta.jms.integration.IntegrationTestRuntimeException;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-public class ConnectionClosingSynchronization implements Synchronization {
+public class BytemanHelper {
 
-    private static final Logger LOGGER = Logger.getLogger(
-            ConnectionClosingSynchronization.class);
+    private static int commitsCounter;
 
-    private final Connection connection;
-
-    public ConnectionClosingSynchronization(Connection connection) {
-        this.connection = connection;
+    public static void reset() {
+        commitsCounter = 0;
     }
 
-    @Override
-    public void beforeCompletion() {
-        // Nothing to do
-    }
-
-    @Override
-    public void afterCompletion(int status) {
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Closing connection " + connection);
-        }
-
-        try {
-            connection.close();
-        } catch (JMSException e) {
-            LOGGER.warn("Failed to close connection " + connection + ": "
-                    + e.getMessage());
+    public void failFirstCommit(Uid uid) {
+        // Increment is called first, so counter should be 1
+        if (commitsCounter == 1) {
+            System.out.println(BytemanHelper.class.getName()
+                    + " fail first commit");
+            ActionManager.manager().remove(uid);
+            ThreadActionData.popAction();
+            throw new IntegrationTestRuntimeException("Failing first commit");
         }
     }
 
-    /**
-     * Should only be used for testing.
-     */
-    Connection getConnection() {
-        return connection;
+    public void incrementCommitsCounter() {
+        commitsCounter++;
+        System.out.println(BytemanHelper.class.getName()
+                + " increment commits counter: " + commitsCounter);
     }
 
 }

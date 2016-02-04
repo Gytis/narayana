@@ -21,11 +21,11 @@
  */
 package org.jboss.narayana.jta.jms;
 
+import org.jboss.logging.Logger;
+
 import javax.jms.JMSException;
 import javax.jms.Session;
 import javax.transaction.Synchronization;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 public class SessionClosingSynchronization implements Synchronization {
 
     private static final Logger LOGGER = Logger.getLogger(
-            SessionClosingSynchronization.class.getName());
+            SessionClosingSynchronization.class);
 
     private final Session session;
 
@@ -48,14 +48,14 @@ public class SessionClosingSynchronization implements Synchronization {
 
     @Override
     public void afterCompletion(int status) {
-        if (LOGGER.isLoggable(Level.FINE)) {
-            LOGGER.fine("Closing session " + session);
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Closing session " + session);
         }
 
         try {
             session.close();
         } catch (JMSException e) {
-            LOGGER.warning("Failed to close session " + session + ": "
+            LOGGER.warn("Failed to close session " + session + ": "
                     + e.getMessage());
         }
     }
