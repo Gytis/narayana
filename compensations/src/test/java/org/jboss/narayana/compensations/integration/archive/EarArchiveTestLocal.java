@@ -33,7 +33,6 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
 
 /**
@@ -72,7 +71,6 @@ public class EarArchiveTestLocal {
     }
 
     @Test
-    @Ignore
     @OperateOnDeployment("client")
     public void test() {
         ParticipantCompletionCoordinatorRules.setParticipantCount(1);
