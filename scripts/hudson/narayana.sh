@@ -33,7 +33,7 @@ function get_pull_xargs {
   res=$(echo $res | sed 's/"/ /g')
   OLDIFS=$IFS
   IFS=', ' read -r -a array <<< "$res"
-  echo "get_pull_xargs: parsing $1" 
+  echo "get_pull_xargs: parsing $1"
 
   for element in "${array[@]}"
   do
@@ -151,7 +151,7 @@ function init_test_options {
         export PERF_TESTS=0 OSGI_TESTS=0 TOMCAT_TESTS=0
     fi
 
-    get_pull_xargs "$PULL_DESCRIPTION" $PROFILE # see if the PR description overrides any of the defaults 
+    get_pull_xargs "$PULL_DESCRIPTION" $PROFILE # see if the PR description overrides any of the defaults
 
     JAVA_VERSION=$(java -version 2>&1 | grep "java version" | cut -d\  -f3 | tr -d '"')
 }
@@ -176,7 +176,7 @@ function check_if_pull_closed
     if [ "$PULL_NUMBER" != "" ]
     then
 	curl -ujbosstm-bot:$BOT_PASSWORD -s https://api.github.com/repos/$GIT_ACCOUNT/$GIT_REPO/pulls/$PULL_NUMBER | grep -q "\"state\": \"closed\""
-	if [ $? -eq 1 ] 
+	if [ $? -eq 1 ]
 	then
 		echo "pull open"
 	else
@@ -199,7 +199,7 @@ function kill_qa_suite_processes
       [[ $main == ${pat}* ]] && killit=1
     done
 
-    if [[ $killit == 1 ]]; then 
+    if [[ $killit == 1 ]]; then
       echo "Test suite process $pid still running - terminating it with signal 9"
       kill -9 $pid
     fi
@@ -225,7 +225,7 @@ function build_narayana {
     ./build.sh -f jboss-transaction-spi/pom.xml clean install
     [ $? = 0 ] || fatal "Build of SPI failed"
   fi
-  
+
   echo "Building Narayana"
   cd $WORKSPACE
 
@@ -264,8 +264,8 @@ function build_as {
     git checkout 5_BRANCH
     [ $? = 0 ] || fatal "git checkout 5_BRANCH failed"
     git fetch
-    [ $? = 0 ] || fatal "git fetch https://github.com/jbosstm/jboss-as.git failed"
-    git reset --hard jbosstm/5_BRANCH
+    [ $? = 0 ] || fatal "git fetch https://github.com/gytis/jboss-as.git failed"
+    git reset --hard gytis/5_BRANCH
     [ $? = 0 ] || fatal "git reset 5_BRANCH failed"
     git clean -f -d -x
     [ $? > 1 ] || fatal "git clean failed"
@@ -273,15 +273,15 @@ function build_as {
     rm -rf .git/rebase-apply
   else
     echo "First time checkout of AS7"
-    git clone https://github.com/jbosstm/jboss-as.git -o jbosstm
-    [ $? = 0 ] || fatal "git clone https://github.com/jbosstm/jboss-as.git failed"
+    git clone https://github.com/gytis/jboss-as.git -o gytis
+    [ $? = 0 ] || fatal "git clone https://github.com/gytis/jboss-as.git failed"
 
     cd jboss-as
 
     git remote add upstream https://github.com/wildfly/wildfly.git
   fi
 
-  [ -z "$AS_BRANCH" ] || git fetch jbosstm +refs/pull/*/head:refs/remotes/jbosstm/pull/*/head
+  [ -z "$AS_BRANCH" ] || git fetch gytis +refs/pull/*/head:refs/remotes/gytis/pull/*/head
   [ $? = 0 ] || fatal "git fetch of pulls failed"
   [ -z "$AS_BRANCH" ] || git checkout $AS_BRANCH
   [ $? = 0 ] || fatal "git fetch of pull branch failed"
@@ -310,7 +310,7 @@ function build_as {
     JAVA_OPTS="-Xms1303m -Xmx1303m -XX:MaxPermSize=512m $JAVA_OPTS" ./build.sh clean install -DskipTests -Dts.smoke=false -Dlicense.skipDownloadLicenses=true $IPV6_OPTS -Drelease=true
   fi
   [ $? = 0 ] || fatal "AS build failed"
-  
+
   #Enable remote debugger
   echo JAVA_OPTS='"$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n"' >> ./build/target/wildfly-*/bin/standalone.conf
 
@@ -613,13 +613,13 @@ function add_qa_xargs {
 
 function qa_tests_once {
   echo "QA Test Suite $@"
-  
-  
+
+
   # Download dependencies
   cd $WORKSPACE
   ./build.sh -f qa/pom.xml dependency:copy-dependencies
   [ $? = 0 ] || fatal "Copy dependency failed"
-  
+
   cd $WORKSPACE/qa
   unset orb
   codeCoverage=false;
@@ -736,7 +736,7 @@ function qa_tests_once {
 
     if [ -f TEST-failures.txt ]; then
       echo "Test Failures:"
-      cat TEST-failures.txt 
+      cat TEST-failures.txt
     fi
 
     if [ $codeCoverage = true ]; then
@@ -861,9 +861,9 @@ init_test_options
 # FOR DEBUGGING SUBSEQUENT ISSUES
 if [ -x /usr/bin/free ]; then
     /usr/bin/free
-elif [ -x /usr/bin/vm_stat ]; then 
+elif [ -x /usr/bin/vm_stat ]; then
     /usr/bin/vm_stat
-else 
+else
     echo "Skipping memory report: no free or vm_stat"
 fi
 
@@ -883,7 +883,7 @@ if [ $AS_BUILD = 1 ];then
   build_as "$@"
 else
   echo "Step 1: JBOSS_HOME=$JBOSS_HOME"
-  if [ "x$JBOSS_HOME" == "x" ]; then echo 
+  if [ "x$JBOSS_HOME" == "x" ]; then echo
     echo "Step 2: JBOSS_HOME=$JBOSS_HOME"
     if [ -d ${WORKSPACE}/jboss-as ]; then
       WILDFLY_VERSION_FROM_JBOSS_AS=`awk "/wildfly-parent/ {getline;print;}" ${WORKSPACE}/jboss-as/pom.xml | cut -d \< -f 2|cut -d \> -f 2`
