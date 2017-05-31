@@ -211,6 +211,10 @@ public class XARecoveryModule implements RecoveryModule
 
 	public synchronized void periodicWorkSecondPass()
 	{
+		if (getScanState() == ScanStates.IDLE) {
+			System.out.println("Ignoring second pass");
+			return;
+		}
         setScanState(ScanStates.SECOND_PASS);
 
 		if (jtaLogger.logger.isDebugEnabled())

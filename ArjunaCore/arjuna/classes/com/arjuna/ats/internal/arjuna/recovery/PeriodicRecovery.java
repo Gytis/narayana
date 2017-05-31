@@ -805,7 +805,7 @@ public class PeriodicRecovery extends Thread
         while (modules.hasMoreElements())
         {
             RecoveryModule m = (RecoveryModule) modules.nextElement();
-
+            System.out.println(m.getClass().getSimpleName() + " second pass starting");
             ClassLoader cl = switchClassLoader(m);
             try {
             m.periodicWorkSecondPass();
@@ -813,9 +813,7 @@ public class PeriodicRecovery extends Thread
                 restoreClassLoader(cl);
             }
 
-            if (tsLogger.logger.isDebugEnabled()) {
-                tsLogger.logger.debug(" ");
-            }
+            System.out.println(m.getClass().getSimpleName() + " second pass completed");
         }
 
         // n.b. the caller is responsible for clearing the active scan
